@@ -10,6 +10,8 @@ const dotsAreaCanvasContext = dotsAreaCanvas.getContext("2d");
 let uploadedImageData;
 const CELL_SIZE = 10;
 const grid = {};
+const dotRespawnQueue = [];
+let darkestPixelValue = 1;
 
 input_img_element.addEventListener("change", (e) => {
   createReader(e.target.files[0], function () {
@@ -21,6 +23,9 @@ input_img_element.addEventListener("change", (e) => {
       canvas.height
     );
     const data = uploadedImageData.data; // pixel data in a one-dimensional array
+
+    darkestPixelValue = getDarkestValueInImage(uploadedImageData);
+    console.log(darkestPixelValue);
 
     for (let i = 0; i < data.length; i += 4) {
       const red = data[i]; // Red component of the pixel
@@ -68,13 +73,15 @@ function createReader(file, whenReady) {
 }
 
 const dotDictionary = {};
-const dotsToAdd = 10000;
+const dotsToAdd = 5000;
 const dotSpeed = 2;
 const maxDotRadius = 3;
 const minDotRadius = 0.01;
-const bounceDamper = 0.1;
-const acceleration = 0.001;
-const radiusChangeRate = 0.1;
+const bounceDamper = 1; // 0-1 how much to dampen the bounce .1 = 90% of velocity is lost
+const acceleration = 0.5; // 0-1 how fast the dot accelerates back to normal speed
+const radiusChangeRate = 0.1; // 0-1 how fast the radius changes
+const darknessRespawnThreshold = 0.01; // 0-1 what percentage of the radius to respawn at
+const bounceOffForce = 0.1; // 0-1 how much force to bounce off other dots
 
 function addDots() {
   createGrid();
@@ -84,9 +91,20 @@ function addDots() {
       y: ((Math.random() * 80 + 10) / 100) * dotsAreaCanvas.height,
     };
 
+    const desiredPosition = randomDarkPixelPos(
+      pos.x / dotsAreaCanvas.width,
+      pos.y / dotsAreaCanvas.height,
+      uploadedImageData
+    );
+
+    const desiredMoveDirection = NormalizeVector(
+      desiredPosition.x - pos.x,
+      desiredPosition.y - pos.y
+    );
+
     const velocity = {
-      x: dotSpeed * (Math.random() < 0.5 ? -1 : 1),
-      y: dotSpeed * (Math.random() < 0.5 ? -1 : 1),
+      x: dotSpeed * desiredMoveDirection.x,
+      y: dotSpeed * desiredMoveDirection.y,
     };
 
     const dotObject = new Dot(
@@ -95,7 +113,8 @@ function addDots() {
       pos,
       minDotRadius,
       maxDotRadius,
-      CELL_SIZE
+      CELL_SIZE,
+      desiredPosition
     );
 
     const gridKey = `${dotObject.gridPosition.x},${dotObject.gridPosition.y}`;
@@ -120,8 +139,15 @@ function moveDots() {
   );
 
   for (const [key, value] of Object.entries(dotDictionary)) {
-    const { velocity, position, lastPosition } = value;
-    let { radius, collisionRadius, gridPosition } = value;
+    const {
+      velocity,
+      position,
+      lastPosition,
+      radius,
+      collisionRadius,
+      gridPosition,
+      desiredPosition,
+    } = value;
     value.updatePosition();
 
     const lastGridPosition = { ...gridPosition };
@@ -144,29 +170,17 @@ function moveDots() {
       grid[newGridKey]?.push(value) ?? (grid[newGridKey] = [value]);
     }
 
-    // console.log(velocity);
-    // console.log(VectorMagnitude(velocity.x, velocity.y));
+    const desiredMoveDirection = NormalizeVector(
+      desiredPosition.x - position.x,
+      desiredPosition.y - position.y
+    );
+
     if (Math.abs(velocity.x) < dotSpeed) {
-      velocity.x += acceleration * (velocity.x < 0 ? -1 : 1);
+      velocity.x += acceleration * desiredMoveDirection.x;
     }
     if (Math.abs(velocity.y) < dotSpeed) {
-      velocity.y += acceleration * (velocity.y < 0 ? -1 : 1);
+      velocity.y += acceleration * desiredMoveDirection.y;
     }
-
-    // if (VectorMagnitude(velocity.x, velocity.y) < dotSpeed) {
-    //   if (velocity.x < 0) {
-    //     velocity.x -= acceleration;
-    //   } else {
-    //     velocity.x += acceleration;
-    //   }
-    //   if (velocity.y < 0) {
-    //     velocity.y -= acceleration;
-    //   } else {
-    //     velocity.y += acceleration;
-    //   }
-    // }
-
-    // const yPercent = position.y / dotsAreaCanvas.height;
 
     const pixelValue = getPixelValue(
       position.x / dotsAreaCanvas.width,
@@ -177,6 +191,21 @@ function moveDots() {
     const desiredRadius =
       minDotRadius + (maxDotRadius - minDotRadius) * pixelValue;
     value.radius += (desiredRadius - radius) * radiusChangeRate;
+    // if (collisionRadius < maxDotRadius) {
+    //   value.collisionRadius +=
+    //     ((maxDotRadius - collisionRadius) * radiusChangeRate) / 2;
+    // }
+
+    if (
+      value.radius <
+      (minDotRadius + maxDotRadius) *
+        (darkestPixelValue + 1) *
+        darknessRespawnThreshold
+    ) {
+      respawnDot(value);
+    }
+
+    value.collisionRadius = (maxDotRadius + minDotRadius) * 0.9;
 
     // this is to debug the collision radius
     // drawCircle(
@@ -199,46 +228,8 @@ function moveDots() {
       2
     );
 
-    const neighboringDots = getDotsInNeighboringCells(value);
-
     // bounce off other dots
-    // for (const [key2, dot] of Object.entries(dotDictionary)) {
-    for (const dot of neighboringDots) {
-      if (value === dot) continue;
-
-      const { position: position2, radius: radius2 } = dot;
-
-      const distance = Math.sqrt(
-        (position.x - position2.x) ** 2 + (position.y - position2.y) ** 2
-      );
-
-      if (distance < collisionRadius + radius2) {
-        const overlap = collisionRadius + radius2 - distance;
-        const direction = NormalizeVector(
-          position.x - position2.x,
-          position.y - position2.y
-        );
-
-        position.x += direction.x * overlap * bounceDamper;
-        position.y += direction.y * overlap * bounceDamper;
-
-        position2.x -= direction.x * overlap * bounceDamper;
-        position2.y -= direction.y * overlap * bounceDamper;
-
-        const yDiff = position.y - position2.y;
-        const xDiff = position.x - position2.x;
-
-        // normalize vector for difference between the two dots
-        const normalized = NormalizeVector(xDiff, yDiff);
-        // velocity.x = normalized.x * Math.abs(velocity.x) * bounceDamper;
-        // velocity.y = normalized.y * Math.abs(velocity.y) * bounceDamper;
-        velocity.x = normalized.x * dotSpeed;
-        velocity.y = normalized.y * dotSpeed;
-
-        velocity.x *= bounceDamper;
-        velocity.y *= bounceDamper;
-      }
-    }
+    HandleDotCollision(value);
 
     // bounce off walls
     if (position.x - radius < 0) {
@@ -292,6 +283,43 @@ function getPixelValue(xPercent, yPercent, imageData) {
   return imageData.data[index] / 255;
 }
 
+function getAveragePixelValue(xPercent, yPercent, imageData) {
+  // check surrounding pixels
+  const x = Math.floor(xPercent * imageData.width);
+  const y = Math.floor(yPercent * imageData.height);
+  const index = (y * imageData.width + x) * 4;
+
+  const surroundingPixels = [
+    index - 4,
+    index + 4,
+    index - imageData.width * 4,
+    index + imageData.width * 4,
+  ];
+
+  let total = 0;
+  let count = 0;
+
+  for (const pixel of surroundingPixels) {
+    if (pixel < 0 || pixel > imageData.data.length) continue;
+    total += imageData.data[pixel];
+    count++;
+  }
+
+  return total / count / 255;
+}
+
+function getDarkestValueInImage(imageData) {
+  let darkestValue = 1;
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    const pixelValue = imageData.data[i] / 255;
+    if (pixelValue < darkestValue) {
+      darkestValue = pixelValue;
+    }
+  }
+
+  return darkestValue;
+}
+
 function NormalizeVector(x, y) {
   const length = Math.sqrt(x * x + y * y);
   return {
@@ -336,4 +364,114 @@ function getDotsInNeighboringCells(dot) {
   }
 
   return dotsInNeighboringCells;
+}
+
+function HandleDotCollision(mainDot) {
+  const { position, collisionRadius: col1, velocity } = mainDot;
+  const neighboringDots = getDotsInNeighboringCells(mainDot);
+  // for (const [key2, dot] of Object.entries(dotDictionary)) {
+  for (const otherDot of neighboringDots) {
+    if (mainDot === otherDot) continue;
+
+    const { position: position2, collisionRadius: col2 } = otherDot;
+
+    const distance = Math.sqrt(
+      (position.x - position2.x) ** 2 + (position.y - position2.y) ** 2
+    );
+
+    if (distance < col1 + col2) {
+      // const overlap = col1 + col2 - distance;
+      // const direction = NormalizeVector(
+      //   position.x - position2.x,
+      //   position.y - position2.y
+      // );
+
+      // position.x += direction.x * overlap * bounceDamper;
+      // position.y += direction.y * overlap * bounceDamper;
+
+      // position2.x -= direction.x * overlap * bounceDamper;
+      // position2.y -= direction.y * overlap * bounceDamper;
+
+      const yDiff = position.y - position2.y;
+      const xDiff = position.x - position2.x;
+
+      // // check difference in velocity
+      // const velocityDiff = VectorMagnitude(
+      //   velocity.x - otherDot.velocity.x,
+      //   velocity.y - otherDot.velocity.y
+      // );
+
+      // if the difference in velocity is small, don't bounce
+      // if (velocityDiff < 0.1) continue;
+
+      // normalize vector for difference between the two dots
+      // bounce opposite direction
+      const oppositeDirection = NormalizeVector(xDiff, yDiff);
+      velocity.x = oppositeDirection.x * dotSpeed * bounceOffForce;
+      velocity.y = oppositeDirection.y * dotSpeed * bounceOffForce;
+
+      // dampen velocity
+      velocity.x *= bounceDamper;
+      velocity.y *= bounceDamper;
+    }
+  }
+}
+
+function randomDarkPixelPos() {
+  for (let i = 0; i < 100; i++) {
+    const pos = {
+      x: ((Math.random() * 80 + 10) / 100) * dotsAreaCanvas.width,
+      y: ((Math.random() * 80 + 10) / 100) * dotsAreaCanvas.height,
+    };
+
+    const randomDarkPixel = getPixelValue(
+      pos.x / dotsAreaCanvas.width,
+      pos.y / dotsAreaCanvas.height,
+      uploadedImageData
+    );
+    if (randomDarkPixel < darkestPixelValue + 0.05) {
+      return pos;
+    }
+  }
+}
+
+function respawnDot(dot) {
+  const { position: pos } = dot;
+  for (let i = 0; i < 100; i++) {
+    const randomPos = {
+      x: ((Math.random() * 80 + 10) / 100) * dotsAreaCanvas.width,
+      y: ((Math.random() * 80 + 10) / 100) * dotsAreaCanvas.height,
+    };
+    // check if the dot will be on top of other dots
+    const neighboringDots = getDotsInNeighboringCells(dot);
+    let isOverlapping = false;
+    for (const otherDot of neighboringDots) {
+      const { position: position2, collisionRadius: radius2 } = otherDot;
+
+      const distance = Math.sqrt(
+        (pos.x - position2.x) ** 2 + (pos.y - position2.y) ** 2
+      );
+
+      if (distance < dot.collisionRadius + radius2) {
+        isOverlapping = true;
+        break;
+      }
+    }
+
+    // if (isOverlapping) continue;
+
+    const pixelValue = getPixelValue(
+      randomPos.x / dotsAreaCanvas.width,
+      randomPos.y / dotsAreaCanvas.height,
+      uploadedImageData
+    );
+
+    if (pixelValue > (darkestPixelValue + 1) * 0.6) {
+      dot.position = randomPos;
+      dot.radius = minDotRadius;
+      // dot.collisionRadius = minDotRadius;
+      dot.desiredPosition = randomDarkPixelPos();
+      break;
+    }
+  }
 }

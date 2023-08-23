@@ -1,5 +1,13 @@
 class Dot {
-  constructor(id, velocity, position, radius, collisionRadius, cellSize) {
+  constructor(
+    id,
+    velocity,
+    position,
+    radius,
+    collisionRadius,
+    cellSize,
+    desiredPosition
+  ) {
     this.id = id;
     this.velocity = velocity;
     this.position = position;
@@ -10,6 +18,7 @@ class Dot {
       y: Math.floor(position.y / cellSize),
     };
     this.cellSize = cellSize;
+    this.desiredPosition = desiredPosition;
 
     this.lastPosition = position;
   }
