@@ -1,0 +1,97 @@
+:root {
+  --federal-blue: #03045eff;
+  --marian-blue: #023e8aff;
+  --honolulu-blue: #0077b6ff;
+  --blue-green: #0096c7ff;
+  --pacific-cyan: #00b4d8ff;
+  --vivid-sky-blue: #48cae4ff;
+  --non-photo-blue: #90e0efff;
+  --non-photo-blue-2: #ade8f4ff;
+  --light-cyan: #caf0f8ff;
+  --oxford-blue: #00132dff;
+  --oxford-blue-2: #00193bff;
+  --oxford-blue-3: #001e45ff;
+  --oxford-blue-4: #002657ff;
+  --berkeley-blue: #002d67ff;
+  --yale-blue: #00377eff;
+}
+
+*,
+*::before,
+*::after {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  font-family: "Source Code Pro", monospace;
+  font-size: 1.6rem;
+  color: var(--light-cyan);
+  background-color: var(--oxford-blue);
+}
+
+#background {
+  height: 100vh;
+  background: repeat radial-gradient(#00193b99 9%, transparent 9%);
+  background-position: 0% 0%;
+  background-size: 50px 50px;
+}
+
+#input-image-label {
+  display: block;
+  text-align: center;
+}
+#input-image {
+  display: block;
+  margin: 0 auto;
+  background-color: var(--honolulu-blue);
+  border-radius: 5px;
+
+  margin-bottom: 1rem;
+}
+
+#input-image-preview {
+  display: block;
+  margin: 0 auto;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+#dots-area {
+  position: relative;
+  display: block;
+  background-color: red;
+  width: 100%;
+  height: 100%;
+
+  max-height: 90vh;
+  max-width: 90vw;
+
+  margin: 0 auto;
+}
+
+.dot {
+  position: absolute;
+  background-color: var(--light-cyan);
+  border-radius: 50%;
+  width: 1rem;
+  height: 1rem;
+  z-index: 1;
+
+  top: 0;
+  left: 0;
+}
+
+.hidden {
+  display: none !important;
+}

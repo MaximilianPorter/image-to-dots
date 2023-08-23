@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@200;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/style.css" />
+
+    <!-- SCRIPTS -->
+    <script src="https://www.marvinj.org/releases/marvinj-0.9.js"></script>
+    <script type="module" src="/script.js"></script>
+  </head>
+  <body>
+    <div id="background">
+      <label id="input-image-label" for="input-image">Image</label>
+      <input
+        id="input-image"
+        type="file"
+        src="#"
+        alt="missing image"
+        accept="image/*"
+      />
+      <!-- <img id="input-image-preview" class="hidden" src="" alt="image preview" /> -->
+      <canvas id="input-image-preview" class=""></canvas>
+      <div id="dots-area"></div>
+    </div>
+  </body>
+</html>
