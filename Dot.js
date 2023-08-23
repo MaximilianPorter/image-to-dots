@@ -1,26 +1,19 @@
 class Dot {
-  constructor(id, element, velocity, position) {
+  constructor(id, velocity, position, radius, collisionRadius) {
     this.id = id;
-    this.element = element;
     this.velocity = velocity;
     this.position = position;
+    this.radius = radius;
+    this.collisionRadius = collisionRadius;
+
+    this.lastPosition = position;
   }
 
-  move() {
-    if (this.element === null) {
-      console.log("element is null");
-      return;
-    }
+  updatePosition() {
+    this.lastPosition = this.position;
 
-    this.element.style.left =
-      parseFloat(this.element.style.left) + this.velocity.x + "%";
-    this.element.style.top =
-      parseFloat(this.element.style.top) + this.velocity.y + "%";
-  }
-
-  setPosition(x, y) {
-    this.position.x = x;
-    this.position.y = y;
+    this.position.x = this.position.x + this.velocity.x;
+    this.position.y = this.position.y + this.velocity.y;
   }
 }
 

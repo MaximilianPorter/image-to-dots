@@ -4,7 +4,10 @@ import Dot from "./Dot.js";
 const input_img_element = document.getElementById("input-image");
 const canvas = document.getElementById("input-image-preview");
 const canvasContext = canvas.getContext("2d");
-const dotsAreaElement = document.getElementById("dots-area");
+const dotsAreaCanvas = document.getElementById("dots-area");
+const dotsAreaCanvasContext = dotsAreaCanvas.getContext("2d");
+dotsAreaCanvas.width = window.innerWidth;
+dotsAreaCanvas.height = window.innerHeight;
 
 input_img_element.addEventListener("change", (e) => {
   createReader(e.target.files[0], function () {
@@ -55,19 +58,16 @@ function createReader(file, whenReady) {
 }
 
 const dotDictionary = {};
-const dotsToAdd = 500;
-const dotSpeed = 0.5;
+const dotsToAdd = 1000;
+const dotSpeed = 1;
+const maxDotRadius = 5;
+const minDotRadius = 1;
 
 function addDots() {
   for (let i = 0; i < dotsToAdd; i++) {
-    const dot = document.createElement("div");
-    dot.classList.add("dot");
-
-    dotsAreaElement.appendChild(dot);
-
     const pos = {
-      x: Math.random() * 80 + 10,
-      y: Math.random() * 80 + 10,
+      x: ((Math.random() * 80 + 10) / 100) * dotsAreaCanvas.width,
+      y: ((Math.random() * 80 + 10) / 100) * dotsAreaCanvas.height,
     };
 
     const velocity = {
@@ -75,12 +75,9 @@ function addDots() {
       y: dotSpeed * (Math.random() < 0.5 ? -1 : 1),
     };
 
-    const dotObject = new Dot(i, dot, velocity, pos);
+    const dotObject = new Dot(i, velocity, pos, 20, maxDotRadius);
 
     dotDictionary[i] = dotObject;
-
-    dot.style.left = pos.x + "%";
-    dot.style.top = pos.y + "%";
   }
 }
 
@@ -88,40 +85,123 @@ addDots();
 
 // move dots every frame
 function moveDots() {
+  // clear canvas
+  dotsAreaCanvasContext.clearRect(
+    0,
+    0,
+    dotsAreaCanvas.width,
+    dotsAreaCanvas.height
+  );
+
   for (const [key, value] of Object.entries(dotDictionary)) {
-    const { element, velocity, position } = value;
-    position.x = position.x + velocity.x;
-    position.y = position.y + velocity.y;
-    element.style.left = position.x + "%";
-    element.style.top = position.y + "%";
+    const { velocity, position, lastPosition, collisionRadius } = value;
+    let { radius } = value;
+    value.updatePosition();
 
-    const rect = element.getBoundingClientRect();
-    let x = rect.left;
-    let y = rect.top;
-    let w = rect.width;
-    let h = rect.height;
+    const yPercent = position.y / dotsAreaCanvas.height;
 
-    let boundingRect = dotsAreaElement.getBoundingClientRect();
-    let boundingX = boundingRect.left;
-    let boundingY = boundingRect.top;
-    let boundingW = boundingRect.width;
-    let boundingH = boundingRect.height;
+    radius = minDotRadius + (maxDotRadius - minDotRadius) * yPercent;
 
-    if (x < boundingX || x + w > boundingX + boundingW) {
+    // drawCircle(
+    //   dotsAreaCanvasContext,
+    //   position.x,
+    //   position.y,
+    //   collisionRadius,
+    //   null,
+    //   "green",
+    //   2
+    // );
+
+    drawCircle(
+      dotsAreaCanvasContext,
+      position.x,
+      position.y,
+      radius,
+      "white",
+      "black",
+      2
+    );
+
+    // bounce off other dots
+    for (const [key2, value2] of Object.entries(dotDictionary)) {
+      if (key === key2) continue;
+
+      const { position: position2 } = value2;
+
+      const distance = Math.sqrt(
+        (position.x - position2.x) ** 2 + (position.y - position2.y) ** 2
+      );
+
+      if (distance < collisionRadius * 2) {
+        const angle = Math.atan2(
+          position2.y - position.y,
+          position2.x - position.x
+        );
+
+        const overlap = collisionRadius * 2 - distance;
+
+        const moveX = overlap * Math.cos(angle);
+        const moveY = overlap * Math.sin(angle);
+
+        position.x -= moveX;
+        position.y -= moveY;
+
+        const yDiff = position.y - position2.y;
+        const xDiff = position.x - position2.x;
+
+        // normalize vector for difference between the two dots
+        const length = Math.sqrt(yDiff * yDiff + xDiff * xDiff);
+        const normalized = {
+          x: xDiff / length,
+          y: yDiff / length,
+        };
+        velocity.x = normalized.x * dotSpeed;
+        velocity.y = normalized.y * dotSpeed;
+
+        // if (position2.x > position.x) {
+        //   velocity.x = -Math.abs(velocity.x);
+        // } else {
+        //   velocity.x = Math.abs(velocity.x);
+        // }
+
+        // if (position2.y > position.y) {
+        //   velocity.y = -Math.abs(velocity.y);
+        // } else {
+        //   velocity.y = Math.abs(velocity.y);
+        // }
+      }
+    }
+
+    // bounce off walls
+    if (
+      position.x - collisionRadius < 0 ||
+      position.x + collisionRadius > dotsAreaCanvas.width
+    ) {
       velocity.x = -velocity.x;
     }
 
-    if (y < boundingY || y + h > boundingY + boundingH) {
+    if (
+      position.y - collisionRadius < 0 ||
+      position.y + collisionRadius > dotsAreaCanvas.height
+    ) {
       velocity.y = -velocity.y;
     }
-
-    // const pos = {
-    //   x: parseFloat(element.style.left),
-    //   y: parseFloat(element.style.top),
-    // };
-    // element.style.backgroundColor = `rgb(${pos.x}%, ${pos.y}%, 50%)`;
   }
 
-  // requestAnimationFrame(moveDots);
+  requestAnimationFrame(moveDots);
 }
 moveDots();
+
+function drawCircle(ctx, x, y, radius, fill, stroke, strokeWidth) {
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+  if (fill) {
+    ctx.fillStyle = fill;
+    ctx.fill();
+  }
+  if (stroke) {
+    ctx.lineWidth = strokeWidth;
+    ctx.strokeStyle = stroke;
+    ctx.stroke();
+  }
+}
