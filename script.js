@@ -4,8 +4,11 @@ import {
   Clamp,
   NormalizeVector,
   VectorMagnitude,
+  VectorDirection,
+  DotProduct,
   Lerp,
   drawCircle,
+  drawLine,
 } from "./helper.js";
 import { createGrid } from "./grid.js";
 import {
@@ -22,20 +25,21 @@ const dotsAreaCanvas = document.getElementById("dots-area");
 const dotsAreaCanvasContext = dotsAreaCanvas.getContext("2d");
 
 let uploadedImageData;
-const CELL_SIZE = 10;
+const CELL_SIZE = 30;
 let grid = {};
 let darkestPixelValue = 1;
 
 const dotDictionary = {};
 const dotsToAdd = 5000;
 const dotSpeed = 0.5;
-const maxDotRadius = 10;
-const minDotRadius = 1;
+const maxDotRadius = 5;
+const minDotRadius = 0.1;
 const bounceDamper = 0.7; // 0-1 how much to dampen the bounce .1 = 90% of velocity is lost
-const acceleration = 0.1; // 0-1 how fast the dot accelerates back to normal speed
+const decelleration = 0.01; // 0-1 how fast the dot accelerates back to normal speed
 const radiusChangeRate = 0.1; // 0-1 how fast the radius changes
 const darknessRespawnThreshold = 0.05; // 0-1 what percentage of the radius to respawn at
 const bounceOffForce = 0.4; // 0-1 how much force to bounce off other dots
+const steeringStrength = 0.5;
 const colored = false;
 
 input_img_element.addEventListener("change", (e) => {
@@ -104,16 +108,16 @@ function greyscaleData(data) {
 function addDots() {
   grid = createGrid(dotsAreaCanvas.width, dotsAreaCanvas.height, CELL_SIZE);
   for (let i = 0; i < dotsToAdd; i++) {
-    const pos = {
-      x: Lerp(0.1, 0.9, Math.random()) * dotsAreaCanvas.width,
-      y: Lerp(0.1, 0.9, Math.random()) * dotsAreaCanvas.height,
-    };
+    const pos = [
+      Lerp(0.1, 0.9, Math.random()) * dotsAreaCanvas.width,
+      Lerp(0.1, 0.9, Math.random()) * dotsAreaCanvas.height,
+    ];
 
     // random normalized move dir
-    const moveDirection = NormalizeVector(
+    const moveDirection = NormalizeVector([
       Math.random() * 2 - 1,
-      Math.random() * 2 - 1
-    );
+      Math.random() * 2 - 1,
+    ]);
 
     const dotObject = new Dot(
       i,
@@ -121,7 +125,8 @@ function addDots() {
       dotSpeed,
       pos,
       minDotRadius,
-      (maxDotRadius + minDotRadius) * 0.9,
+      maxDotRadius + 10,
+      maxDotRadius / 2,
       CELL_SIZE
     );
 
@@ -174,8 +179,8 @@ DrawDotsOnCanvas();
 async function DrawDot(dot) {
   const { position, radius } = dot;
   const positionPercent = {
-    x: position.x / dotsAreaCanvas.width,
-    y: position.y / dotsAreaCanvas.height,
+    x: position[0] / dotsAreaCanvas.width,
+    y: position[1] / dotsAreaCanvas.height,
   };
   const apColor = getApproximatePixelColor(
     positionPercent.x,
@@ -185,39 +190,93 @@ async function DrawDot(dot) {
 
   const colorString = `rgba(${apColor.red}, ${apColor.green}, ${apColor.blue}, ${apColor.alpha})`;
 
+  // draw first dot red
+  const dotColor = dot.id === 0 ? "red" : "white";
+
   drawCircle(
     dotsAreaCanvasContext,
-    position.x,
-    position.y,
+    position[0],
+    position[1],
     radius,
-    colored ? colorString : "white",
+    colored ? colorString : dotColor,
     null,
     2
   );
+
+  if (dot.id === 0) DrawDebug(dot);
 }
 function DrawDebug(dot) {
-  const { position, collisionRadius } = dot;
+  const { position, detectionRadius, collisionRadius } = dot;
+  const outlineColor = dot.id === 0 ? "red" : "green";
   drawCircle(
     dotsAreaCanvasContext,
-    position.x,
-    position.y,
+    position[0],
+    position[1],
+    detectionRadius,
+    null,
+    outlineColor,
+    1
+  );
+
+  drawCircle(
+    dotsAreaCanvasContext,
+    position[0],
+    position[1],
     collisionRadius,
     null,
-    "green",
+    outlineColor,
+    1
+  );
+
+  drawLine(
+    dotsAreaCanvasContext,
+    position[0],
+    position[1],
+    position[0] + dot.moveDirection[0] * 10,
+    position[1] + dot.moveDirection[1] * 10,
+    outlineColor,
     2
   );
+
+  if (dot.id === 0) {
+    // draw box around dot covering all the cells
+    const { gridPosition } = dot;
+    const cellSize = CELL_SIZE;
+    const x = gridPosition.x * cellSize;
+    const y = gridPosition.y * cellSize;
+    drawLine(dotsAreaCanvasContext, x, y, x + cellSize, y, "red", 2);
+    drawLine(dotsAreaCanvasContext, x, y, x, y + cellSize, "red", 2);
+    drawLine(
+      dotsAreaCanvasContext,
+      x + cellSize,
+      y,
+      x + cellSize,
+      y + cellSize,
+      "red",
+      2
+    );
+    drawLine(
+      dotsAreaCanvasContext,
+      x,
+      y + cellSize,
+      x + cellSize,
+      y + cellSize,
+      "red",
+      2
+    );
+  }
 }
 
 function MoveDotToOtherEdge(dot) {
-  if (dot.position.y < 0) {
-    dot.position.y = dotsAreaCanvas.height;
-  } else if (dot.position.y > dotsAreaCanvas.height) {
-    dot.position.y = 0;
+  if (dot.position[1] < 0) {
+    dot.position[1] = dotsAreaCanvas.height;
+  } else if (dot.position[1] > dotsAreaCanvas.height) {
+    dot.position[1] = 0;
   }
-  if (dot.position.x < 0) {
-    dot.position.x = dotsAreaCanvas.width;
-  } else if (dot.position.x > dotsAreaCanvas.width) {
-    dot.position.x = 0;
+  if (dot.position[0] < 0) {
+    dot.position[0] = dotsAreaCanvas.width;
+  } else if (dot.position[0] > dotsAreaCanvas.width) {
+    dot.position[0] = 0;
   }
 }
 
@@ -271,8 +330,8 @@ function getDotsInNeighboringCells(dot) {
 function UpdateDotRadius(dot) {
   const { position, radius } = dot;
   const positionPercent = {
-    x: position.x / dotsAreaCanvas.width,
-    y: position.y / dotsAreaCanvas.height,
+    x: position[0] / dotsAreaCanvas.width,
+    y: position[1] / dotsAreaCanvas.height,
   };
   const pixelValue = getPixelValue(
     positionPercent.x,
@@ -297,7 +356,59 @@ function UpdateDotRadius(dot) {
 }
 
 function HandleDotCollision(dot) {
+  const dotsInNeighboringCells = getDotsInNeighboringCells(dot);
+  // const dotsInNeighboringCells = Object.values(dotDictionary);
+  const direction = SteerDirection(dot, dotsInNeighboringCells);
+  dot.moveDirection = NormalizeVector(
+    dot.moveDirection.map((dir, i) => dir + direction[i])
+  );
+
   MoveDotToOtherEdge(dot);
+}
+
+function SteerDirection(dot, otherDots) {
+  const { moveDirection, detectionRadius, collisionRadius } = dot;
+  let direction = [0, 0];
+  otherDots.forEach((otherDot) => {
+    if (otherDot.id === dot.id) return null;
+
+    const dotsVector = VectorDirection(dot.position, otherDot.position);
+    const distance = VectorMagnitude(dotsVector);
+
+    if (distance <= collisionRadius) {
+      dot.moveSpeed = Clamp(
+        dot.moveSpeed - decelleration,
+        dotSpeed * 0.1,
+        dotSpeed
+      );
+    }
+
+    if (distance > detectionRadius) return null;
+
+    // check dot product between moveDirection and vector between dots
+    const dotProduct = DotProduct(moveDirection, dotsVector);
+
+    const inVisionCone = dotProduct > 0;
+    if (!inVisionCone) return null;
+
+    if (dot.id === 0) {
+      drawLine(
+        dotsAreaCanvasContext,
+        dot.position[0],
+        dot.position[1],
+        otherDot.position[0],
+        otherDot.position[1],
+        "blue",
+        2
+      );
+    }
+    // turn away from other dot
+    const ratio = Clamp(distance / detectionRadius, 0, 1);
+    direction[0] -= dotsVector[0] * ratio * steeringStrength * 0.01;
+    direction[1] -= dotsVector[1] * ratio * steeringStrength * 0.01;
+  });
+
+  return direction;
 }
 
 function randomPointOnOppoSideOfImage(xPercent, yPercent) {
@@ -338,7 +449,6 @@ function respawnDot(dot) {
     if (pixelValue > (darkestPixelValue + 1) * 0.6) {
       dot.position = randomPos;
       dot.radius = minDotRadius;
-      // dot.collisionRadius = minDotRadius;
       dot.desiredPosition = randomPointOnOppoSideOfImage(
         randomPosPercent.x,
         randomPosPercent.y

@@ -5,6 +5,7 @@ class Dot {
     moveSpeed,
     position,
     radius,
+    detectionRadius,
     collisionRadius,
     cellSize
   ) {
@@ -13,10 +14,13 @@ class Dot {
     this.moveSpeed = moveSpeed;
     this.position = position;
     this.radius = radius;
+    this.startMoveSpeed = moveSpeed;
+    this.accelleration = 0.0005;
+    this.detectionRadius = detectionRadius;
     this.collisionRadius = collisionRadius;
     this.gridPosition = {
-      x: Math.floor(position.x / cellSize),
-      y: Math.floor(position.y / cellSize),
+      x: Math.floor(position[0] / cellSize),
+      y: Math.floor(position[1] / cellSize),
     };
     this.cellSize = cellSize;
 
@@ -26,13 +30,21 @@ class Dot {
   updatePosition() {
     this.lastPosition = this.position;
 
-    this.position.x = this.position.x + this.moveDirection.x * this.moveSpeed;
-    this.position.y = this.position.y + this.moveDirection.y * this.moveSpeed;
+    this.position[0] =
+      this.position[0] + this.moveDirection[0] * this.moveSpeed;
+    this.position[1] =
+      this.position[1] + this.moveDirection[1] * this.moveSpeed;
+
+    if (this.moveSpeed < this.startMoveSpeed) {
+      this.moveSpeed += this.accelleration;
+    } else {
+      this.moveSpeed = this.startMoveSpeed;
+    }
   }
 
   updateGridPosition() {
-    this.gridPosition.x = Math.floor(this.position.x / this.cellSize);
-    this.gridPosition.y = Math.floor(this.position.y / this.cellSize);
+    this.gridPosition.x = Math.floor(this.position[0] / this.cellSize);
+    this.gridPosition.y = Math.floor(this.position[1] / this.cellSize);
   }
 }
 
