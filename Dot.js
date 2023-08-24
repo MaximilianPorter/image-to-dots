@@ -1,15 +1,16 @@
 class Dot {
   constructor(
     id,
-    velocity,
+    moveDirection,
+    moveSpeed,
     position,
     radius,
     collisionRadius,
-    cellSize,
-    desiredPosition
+    cellSize
   ) {
     this.id = id;
-    this.velocity = velocity;
+    this.moveDirection = moveDirection;
+    this.moveSpeed = moveSpeed;
     this.position = position;
     this.radius = radius;
     this.collisionRadius = collisionRadius;
@@ -18,7 +19,6 @@ class Dot {
       y: Math.floor(position.y / cellSize),
     };
     this.cellSize = cellSize;
-    this.desiredPosition = desiredPosition;
 
     this.lastPosition = position;
   }
@@ -26,8 +26,8 @@ class Dot {
   updatePosition() {
     this.lastPosition = this.position;
 
-    this.position.x = this.position.x + this.velocity.x;
-    this.position.y = this.position.y + this.velocity.y;
+    this.position.x = this.position.x + this.moveDirection.x * this.moveSpeed;
+    this.position.y = this.position.y + this.moveDirection.y * this.moveSpeed;
   }
 
   updateGridPosition() {
