@@ -60,7 +60,7 @@ body {
   display: block;
   margin: 0 auto;
 
-  max-width: 90vw;
+  max-width: 45vw;
   max-height: 90vh;
 }
 
@@ -70,7 +70,7 @@ body {
   display: block;
   background-color: black;
 
-  max-height: 90vh;
+  max-height: 45vh;
   max-width: 90vw;
 
   margin: 0 auto;
@@ -86,6 +86,29 @@ body {
 
   top: 0;
   left: 0;
+}
+
+.preview-images {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1;
+  grid-gap: 1rem;
+}
+
+@media (width < 1000px) {
+  .preview-images {
+    grid-template-columns: 1fr;
+  }
+
+  #input-image-preview {
+    max-width: 90vw;
+    max-height: 90vh;
+  }
+
+  #dots-area {
+    max-width: 90vw;
+    max-height: 90vh;
+  }
 }
 
 .hidden {
