@@ -25,12 +25,16 @@ const canvasContext = canvas.getContext("2d");
 const dotsAreaCanvas = document.getElementById("dots-area");
 const dotsAreaCanvasContext = dotsAreaCanvas.getContext("2d");
 
+// settings elements
+const isColored_element = document.getElementById("IsColoredCheck");
+
 let uploadedImageData;
 let grid = {};
 let darkestPixelValue = 1;
 
 const dotDictionary = {};
 const {
+  isDrawingDebug,
   CELL_SIZE,
   dotsToAdd,
   dotSpeed,
@@ -40,15 +44,18 @@ const {
   steeringStrength,
   decelleration,
   minSpeedPercentage,
-  colored,
   darknessRespawnThreshold,
   debugDetectionRadius,
   centeringFactor,
   alignmentFactor,
   separationFactor,
+  turnTowardsLightFactor,
   visionDotProductThreshold,
   slowDotProductThreshold,
-} = valueSettings.moreDotsSettings;
+} = valueSettings.currentSettings;
+
+// stuff you can change with ui
+let { colored } = valueSettings.currentSettings;
 
 input_img_element.addEventListener("change", (e) => {
   createReader(e.target.files[0], function () {
@@ -68,6 +75,10 @@ input_img_element.addEventListener("change", (e) => {
     addDots();
     moveDots();
   });
+});
+
+isColored_element.addEventListener("change", (e) => {
+  colored = e.target.checked;
 });
 
 function createReader(file, whenReady) {
@@ -90,25 +101,6 @@ function createReader(file, whenReady) {
     image.src = evt.target.result;
   };
   reader.readAsDataURL(file);
-}
-
-function greyscaleData(data) {
-  for (let i = 0; i < data.length; i += 4) {
-    const red = data[i]; // Red component of the pixel
-    const green = data[i + 1]; // Green component of the pixel
-    const blue = data[i + 2]; // Blue component of the pixel
-    const alpha = data[i + 3]; // Alpha (transparency) component of the pixel
-
-    // Convert the pixel to grayscale
-    const gray = 0.299 * red + 0.587 * green + 0.114 * blue;
-
-    // Set the pixel to gray
-    data[i] = gray;
-    data[i + 1] = gray;
-    data[i + 2] = gray;
-    data[i + 3] = alpha;
-  }
-  return data;
 }
 
 // DOT STUFF ------------------------------
@@ -199,7 +191,7 @@ function DrawDot(dot) {
   const colorString = `rgba(${apColor.red}, ${apColor.green}, ${apColor.blue}, ${apColor.alpha})`;
 
   // draw first dot red
-  const dotColor = dot.id === 0 ? "red" : "white";
+  const dotColor = dot.id === 0 && isDrawingDebug ? "red" : "white";
 
   drawCircle(
     dotsAreaCanvasContext,
@@ -211,9 +203,10 @@ function DrawDot(dot) {
     2
   );
 
-  if (dot.id === 0) DrawDebug(dot);
+  if (dot.id === 0 && isDrawingDebug) DrawDebug(dot);
 }
 function DrawDebug(dot) {
+  if (!isDrawingDebug) return;
   const { position, detectionRadius, collisionRadius } = dot;
   const outlineColor = dot.id === 0 ? "red" : "green";
   drawCircle(
@@ -435,11 +428,17 @@ function SteerDirection(dot, otherDots) {
   let xposAvg = 0;
   let yposAvg = 0;
   let dotsVisible = 0;
+  let largestDot = null;
   for (const otherDot of otherDots) {
     if (otherDot.id === dot.id) continue;
 
     // // turn away from edges
     // direction = TurnAwayFromEdges(dot, direction);
+
+    // turn towards larger dots
+    if (largestDot === null || otherDot.radius > largestDot.radius) {
+      largestDot = otherDot;
+    }
 
     const dotsVector = VectorDirection(dot.position, otherDot.position);
     const distance = VectorMagnitude(dotsVector);
@@ -460,7 +459,10 @@ function SteerDirection(dot, otherDots) {
     // slow down if close to other dot
     if (distance <= detectionRadius && dotProduct > slowDotProductThreshold) {
       dot.moveSpeed = Clamp(
-        dot.moveSpeed - decelleration * Lerp(1, 0, distance / detectionRadius),
+        dot.moveSpeed -
+          decelleration *
+            Lerp(0, 2, dot.radius / maxDotRadius) *
+            Lerp(1, 0, distance / detectionRadius),
         dotSpeed * minSpeedPercentage,
         dotSpeed
       );
@@ -482,6 +484,14 @@ function SteerDirection(dot, otherDots) {
     );
   }
 
+  // turn towards larger dots
+  if (largestDot !== null) {
+    const dotsVector = VectorDirection(dot.position, largestDot.position);
+    direction = direction.map(
+      (dir, i) => dir + dotsVector[i] * turnTowardsLightFactor
+    );
+  }
+
   if (dotsVisible > 0) {
     xposAvg /= dotsVisible;
     yposAvg /= dotsVisible;
@@ -491,7 +501,7 @@ function SteerDirection(dot, otherDots) {
       (dir, i) => dir + desiredDirection[i] * centeringFactor
     );
 
-    if (dot.id === 0) {
+    if (dot.id === 0 && isDrawingDebug) {
       drawCircle(dotsAreaCanvasContext, xposAvg, yposAvg, 5, "yellow", null, 2);
     }
   }
@@ -525,7 +535,7 @@ function TurnAwayFromEdges(dot, direction) {
     direction = direction.map(
       (dir, i) => dir + edgeVector[i] * 0.8 * (1 - edgeDistance / dot.radius)
     );
-    if (dot.id === 0) {
+    if (dot.id === 0 && isDrawingDebug) {
       drawLine(
         dotsAreaCanvasContext,
         dot.position[0],
@@ -542,6 +552,7 @@ function TurnAwayFromEdges(dot, direction) {
 }
 
 function DebugDrawLinePositions(pos1, pos2) {
+  if (!isDrawingDebug) return;
   drawLine(
     dotsAreaCanvasContext,
     pos1[0],

@@ -1,5 +1,6 @@
 class Settings {
   constructor(
+    isDrawingDebug = false,
     CELL_SIZE = 50,
     dotsToAdd = 500,
     dotSpeed = 0.2,
@@ -17,9 +18,11 @@ class Settings {
     centeringFactor = 0.05,
     alignmentFactor = 0.8,
     separationFactor = 0.1,
+    turnTowardsLightFactor = 0.01,
     visionDotProductThreshold = -0.5,
     slowDotProductThreshold = 0.5
   ) {
+    this.isDrawingDebug = isDrawingDebug;
     this.CELL_SIZE = CELL_SIZE;
     this.dotsToAdd = dotsToAdd;
     this.dotSpeed = dotSpeed;
@@ -37,6 +40,7 @@ class Settings {
     this.centeringFactor = centeringFactor;
     this.alignmentFactor = alignmentFactor;
     this.separationFactor = separationFactor;
+    this.turnTowardsLightFactor = turnTowardsLightFactor;
     this.visionDotProductThreshold = visionDotProductThreshold;
     this.slowDotProductThreshold = slowDotProductThreshold;
   }
@@ -45,7 +49,13 @@ class Settings {
 class Debug_Settings extends Settings {
   constructor() {
     super();
-    this.dotSpeed = 0.5;
+    this.isDrawingDebug = true;
+    this.dotSpeed = 2;
+
+    // this.centeringFactor = 0; // .1
+    // this.alignmentFactor = 0.1; // .2
+    // this.separationFactor = 0.5;
+    // this.radiusChangeRate = 0.01;
   }
 }
 const debugSettings = new Debug_Settings();
@@ -53,15 +63,21 @@ const debugSettings = new Debug_Settings();
 class MoreDots_Settings extends Settings {
   constructor() {
     super();
-    this.CELL_SIZE = 10;
+    // this.isDrawingDebug = true;
+    this.CELL_SIZE = 50;
     this.dotsToAdd = 5000;
-    this.maxDotRadius = 3;
-    this.minDotRadius = 0.01;
-    this.centeringFactor = 0.1;
-    this.alignmentFactor = 0.2;
-    this.separationFactor = 0.5;
+    this.dotSpeed = 1;
+    this.maxDotRadius = 10;
+    this.minDotRadius = 0.001;
+    this.centeringFactor = 0.1; // .1
+    this.alignmentFactor = 0.1; // .2
+    this.turnTowardsLightFactor = 0.001;
+    this.separationFactor = 1;
+    // this.radiusChangeRate = 0.01;
   }
 }
 const moreDotsSettings = new MoreDots_Settings();
 
-export { debugSettings, moreDotsSettings };
+const currentSettings = moreDotsSettings;
+
+export { currentSettings };

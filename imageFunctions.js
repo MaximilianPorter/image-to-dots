@@ -55,9 +55,29 @@ function getDarkestValueInImage(imageData) {
   return darkestValue;
 }
 
+function greyscaleData(data) {
+  for (let i = 0; i < data.length; i += 4) {
+    const red = data[i]; // Red component of the pixel
+    const green = data[i + 1]; // Green component of the pixel
+    const blue = data[i + 2]; // Blue component of the pixel
+    const alpha = data[i + 3]; // Alpha (transparency) component of the pixel
+
+    // Convert the pixel to grayscale
+    const gray = 0.299 * red + 0.587 * green + 0.114 * blue;
+
+    // Set the pixel to gray
+    data[i] = gray;
+    data[i + 1] = gray;
+    data[i + 2] = gray;
+    data[i + 3] = alpha;
+  }
+  return data;
+}
+
 export {
   getApproximatePixelColor,
   getPixelValue,
   getAveragePixelValue,
   getDarkestValueInImage,
+  greyscaleData,
 };
