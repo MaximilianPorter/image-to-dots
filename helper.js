@@ -58,14 +58,39 @@ function drawLine(ctx, x1, y1, x2, y2, stroke, strokeWidth) {
   }
 }
 
+function BezierCurve(p1, p2, p3, p4, t) {
+  const x =
+    Math.pow(1 - t, 3) * p1[0] +
+    3 * Math.pow(1 - t, 2) * t * p2[0] +
+    3 * (1 - t) * Math.pow(t, 2) * p3[0] +
+    Math.pow(t, 3) * p4[0];
+  const y =
+    Math.pow(1 - t, 3) * p1[1] +
+    3 * Math.pow(1 - t, 2) * t * p2[1] +
+    3 * (1 - t) * Math.pow(t, 2) * p3[1] +
+    Math.pow(t, 3) * p4[1];
+  return [x, y];
+}
+
+function DrawBezierCurve(ctx, p1, p2, p3, p4, color) {
+  ctx.beginPath();
+  ctx.moveTo(p1[0], p1[1]);
+  ctx.bezierCurveTo(p2[0], p2[1], p3[0], p3[1], p4[0], p4[1]);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+
 export {
   Clamp,
   NormalizeVector,
   VectorMagnitude,
   SquareVectorMagnitude,
   VectorDirection,
-  DotProduct,
   Lerp,
+  DotProduct,
   drawCircle,
   drawLine,
+  BezierCurve,
+  DrawBezierCurve,
 };

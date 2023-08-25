@@ -1,16 +1,6 @@
 // import Dot.js
 import Dot from "./Dot.js";
-import {
-  Clamp,
-  NormalizeVector,
-  VectorMagnitude,
-  SquareVectorMagnitude,
-  VectorDirection,
-  DotProduct,
-  Lerp,
-  drawCircle,
-  drawLine,
-} from "./helper.js";
+import * as help from "./helper.js";
 import { createGrid } from "./grid.js";
 import {
   getApproximatePixelColor,
@@ -20,6 +10,12 @@ import {
   getLightestValueInImage,
 } from "./imageFunctions.js";
 import * as valueSettings from "./settings.js";
+import * as dotBezier from "./dotSizeBezier.js";
+console.log(dotBezier.GetDotSizeBezierCurve(0));
+console.log(dotBezier.GetDotSizeBezierCurve(0.25));
+console.log(dotBezier.GetDotSizeBezierCurve(0.5));
+console.log(dotBezier.GetDotSizeBezierCurve(0.75));
+console.log(dotBezier.GetDotSizeBezierCurve(1));
 
 const input_img_element = document.getElementById("input-image");
 const canvas = document.getElementById("input-image-preview");
@@ -117,12 +113,12 @@ function addDots() {
   grid = createGrid(dotsAreaCanvas.width, dotsAreaCanvas.height, CELL_SIZE);
   for (let i = 0; i < dotsToAdd; i++) {
     const pos = [
-      Lerp(0.1, 0.9, Math.random()) * dotsAreaCanvas.width,
-      Lerp(0.1, 0.9, Math.random()) * dotsAreaCanvas.height,
+      help.Lerp(0.1, 0.9, Math.random()) * dotsAreaCanvas.width,
+      help.Lerp(0.1, 0.9, Math.random()) * dotsAreaCanvas.height,
     ];
 
     // random normalized move dir
-    const moveDirection = NormalizeVector([
+    const moveDirection = help.NormalizeVector([
       Math.random() * 2 - 1,
       Math.random() * 2 - 1,
     ]);
@@ -218,7 +214,7 @@ function DrawDot(dot) {
   // draw first dot red
   const dotColor = dot.id === 0 && isDrawingDebug ? "red" : colorString;
 
-  drawCircle(
+  help.drawCircle(
     dotsAreaCanvasContext,
     position[0],
     position[1],
@@ -234,7 +230,7 @@ function DrawDebug(dot) {
   if (!isDrawingDebug) return;
   const { position, detectionRadius, collisionRadius } = dot;
   const outlineColor = dot.id === 0 ? "red" : "green";
-  drawCircle(
+  help.drawCircle(
     dotsAreaCanvasContext,
     position[0],
     position[1],
@@ -244,7 +240,7 @@ function DrawDebug(dot) {
     1
   );
 
-  drawCircle(
+  help.drawCircle(
     dotsAreaCanvasContext,
     position[0],
     position[1],
@@ -254,7 +250,7 @@ function DrawDebug(dot) {
     1
   );
 
-  drawLine(
+  help.drawLine(
     dotsAreaCanvasContext,
     position[0],
     position[1],
@@ -270,9 +266,9 @@ function DrawDebug(dot) {
     const cellSize = CELL_SIZE;
     const x = gridPosition.x * cellSize;
     const y = gridPosition.y * cellSize;
-    drawLine(dotsAreaCanvasContext, x, y, x + cellSize, y, "red", 2);
-    drawLine(dotsAreaCanvasContext, x, y, x, y + cellSize, "red", 2);
-    drawLine(
+    help.drawLine(dotsAreaCanvasContext, x, y, x + cellSize, y, "red", 2);
+    help.drawLine(dotsAreaCanvasContext, x, y, x, y + cellSize, "red", 2);
+    help.drawLine(
       dotsAreaCanvasContext,
       x + cellSize,
       y,
@@ -281,7 +277,7 @@ function DrawDebug(dot) {
       "red",
       2
     );
-    drawLine(
+    help.drawLine(
       dotsAreaCanvasContext,
       x,
       y + cellSize,
@@ -296,9 +292,9 @@ function DrawDebug(dot) {
 
     neighboringCells.forEach((cell) => {
       const [x, y] = cell.split(",").map((num) => num * cellSize);
-      drawLine(dotsAreaCanvasContext, x, y, x + cellSize, y, "blue", 1);
-      drawLine(dotsAreaCanvasContext, x, y, x, y + cellSize, "blue", 1);
-      drawLine(
+      help.drawLine(dotsAreaCanvasContext, x, y, x + cellSize, y, "blue", 1);
+      help.drawLine(dotsAreaCanvasContext, x, y, x, y + cellSize, "blue", 1);
+      help.drawLine(
         dotsAreaCanvasContext,
         x + cellSize,
         y,
@@ -307,7 +303,7 @@ function DrawDebug(dot) {
         "blue",
         1
       );
-      drawLine(
+      help.drawLine(
         dotsAreaCanvasContext,
         x,
         y + cellSize,
@@ -322,7 +318,7 @@ function DrawDebug(dot) {
     const dotsInNeighboringCells = getDotsInNeighboringCells(dot);
     dotsInNeighboringCells.forEach((otherDot) => {
       const { position: otherPosition } = otherDot;
-      drawCircle(
+      help.drawCircle(
         dotsAreaCanvasContext,
         otherPosition[0],
         otherPosition[1],
@@ -447,13 +443,17 @@ function UpdateDotRadius(dot) {
   // 0 - darkestPixelValue
   // 1 - brightestPixelValue
   const valueRange = brightestPixelValue - darkestPixelValue;
-  const relativeValue = Lerp(
+  const relativeValue = help.Lerp(
     0,
     1,
     (pixelValue - darkestPixelValue) / valueRange
   );
 
-  const desiredRadius = Lerp(minDotRadius, maxDotRadius, relativeValue);
+  const desiredRadius = help.Lerp(
+    minDotRadius,
+    maxDotRadius,
+    dotBezier.GetDotSizeBezierCurve(relativeValue)[1]
+  );
   dot.radius += (desiredRadius - radius) * radiusChangeRate;
 
   dot.detectionRadius = dot.radius + CELL_SIZE * (dot.moveSpeed / dotSpeed);
@@ -475,7 +475,7 @@ function HandleDotCollision(dot) {
   // const dotsInNeighboringCells = Object.values(dotDictionary);
   const direction = SteerDirection(dot, dotsInNeighboringCells);
   dot.moveDirection = dot.moveDirection.map((dir, i) => {
-    return Clamp(dir + direction[i] * steeringStrength, -1, 1);
+    return help.Clamp(dir + direction[i] * steeringStrength, -1, 1);
   });
 
   MoveDotToOtherEdge(dot);
@@ -501,21 +501,21 @@ function SteerDirection(dot, otherDots) {
 
     let otherDotPosition = AdjustPositionForOppositeSide(dot, otherDot);
 
-    const dotsVector = VectorDirection(dot.position, otherDotPosition);
+    const dotsVector = help.VectorDirection(dot.position, otherDotPosition);
     // const distance = VectorMagnitude(dotsVector);
-    const distance2 = SquareVectorMagnitude(dotsVector);
-    const dotProduct = DotProduct(moveDirection, dotsVector);
+    const distance2 = help.SquareVectorMagnitude(dotsVector);
+    const dotProduct = help.DotProduct(moveDirection, dotsVector);
 
     // slow down if close to other dot
     if (
       distance2 <= collisionRadius * collisionRadius &&
       dotProduct > slowDotProductThreshold
     ) {
-      dot.moveSpeed = Clamp(
+      dot.moveSpeed = help.Clamp(
         dot.moveSpeed -
           decelleration *
-            Lerp(0.5, 1, dot.radius / maxDotRadius) *
-            Lerp(1, 0, distance2 / (collisionRadius * collisionRadius)),
+            help.Lerp(0.5, 1, dot.radius / maxDotRadius) *
+            help.Lerp(1, 0, distance2 / (collisionRadius * collisionRadius)),
         dotSpeed * minSpeedPercentage,
         dotSpeed
       );
@@ -536,7 +536,7 @@ function SteerDirection(dot, otherDots) {
     }
 
     const ratio =
-      1 - Clamp(distance2 / (detectionRadius * detectionRadius), 0, 1);
+      1 - help.Clamp(distance2 / (detectionRadius * detectionRadius), 0, 1);
     direction = direction.map((dir, i) => {
       // turn away from other dot
       dir -= dotsVector[i] * ratio * separationFactor;
@@ -548,7 +548,7 @@ function SteerDirection(dot, otherDots) {
 
   // turn towards larger dots
   if (largestDot !== null) {
-    const dotsVector = VectorDirection(dot.position, largestDot.position);
+    const dotsVector = help.VectorDirection(dot.position, largestDot.position);
     direction = direction.map(
       (dir, i) => dir + dotsVector[i] * turnTowardsLightFactor
     );
@@ -558,13 +558,24 @@ function SteerDirection(dot, otherDots) {
     xposAvg /= dotsVisible;
     yposAvg /= dotsVisible;
 
-    const desiredDirection = VectorDirection(dot.position, [xposAvg, yposAvg]);
+    const desiredDirection = help.VectorDirection(dot.position, [
+      xposAvg,
+      yposAvg,
+    ]);
     direction = direction.map(
       (dir, i) => dir + desiredDirection[i] * centeringFactor
     );
 
     if (dot.id === 0 && isDrawingDebug) {
-      drawCircle(dotsAreaCanvasContext, xposAvg, yposAvg, 5, "yellow", null, 2);
+      help.drawCircle(
+        dotsAreaCanvasContext,
+        xposAvg,
+        yposAvg,
+        5,
+        "yellow",
+        null,
+        2
+      );
     }
   }
 
@@ -604,28 +615,28 @@ function TurnAwayFromEdges(dot, direction) {
     leftEdgeVector,
     rightEdgeVector,
   ].reduce((prev, curr) => {
-    const prevDistance2 = SquareVectorMagnitude(
-      VectorDirection(dot.position, prev)
+    const prevDistance2 = help.SquareVectorMagnitude(
+      help.VectorDirection(dot.position, prev)
     );
-    const currDistance2 = SquareVectorMagnitude(
-      VectorDirection(dot.position, curr)
+    const currDistance2 = help.SquareVectorMagnitude(
+      help.VectorDirection(dot.position, curr)
     );
     return prevDistance2 < currDistance2 ? prev : curr;
   });
 
   // check if dot is close to edge
-  const edgeDistance = SquareVectorMagnitude(
-    VectorDirection(dot.position, closestEdgeVector)
+  const edgeDistance = help.SquareVectorMagnitude(
+    help.VectorDirection(dot.position, closestEdgeVector)
   );
   if (edgeDistance < dot.detectionRadius * dot.detectionRadius) {
-    const edgeVector = VectorDirection(dot.position, closestEdgeVector);
+    const edgeVector = help.VectorDirection(dot.position, closestEdgeVector);
     direction = direction.map(
       (dir, i) =>
         dir +
         edgeVector[i] * 0.8 * (1 - edgeDistance / (dot.radius * dot.radius))
     );
     if (dot.id === 0 && isDrawingDebug) {
-      drawLine(
+      help.drawLine(
         dotsAreaCanvasContext,
         dot.position[0],
         dot.position[1],
@@ -642,7 +653,7 @@ function TurnAwayFromEdges(dot, direction) {
 
 function DebugDrawLinePositions(pos1, pos2) {
   if (!isDrawingDebug) return;
-  drawLine(
+  help.drawLine(
     dotsAreaCanvasContext,
     pos1[0],
     pos1[1],
@@ -674,8 +685,8 @@ function randomPointOnOppoSideOfImage(xPercent, yPercent) {
 function respawnDot(dot) {
   for (let i = 0; i < 100; i++) {
     const randomPos = {
-      x: Lerp(0.1, 0.9, Math.random()) * dotsAreaCanvas.width,
-      y: Lerp(0.1, 0.9, Math.random()) * dotsAreaCanvas.height,
+      x: help.Lerp(0.1, 0.9, Math.random()) * dotsAreaCanvas.width,
+      y: help.Lerp(0.1, 0.9, Math.random()) * dotsAreaCanvas.height,
     };
     const randomPosPercent = {
       x: randomPos.x / dotsAreaCanvas.width,
