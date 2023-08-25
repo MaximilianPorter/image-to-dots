@@ -6,9 +6,13 @@ const dotSizeBezierCanvasContext = dotSizeBezierCanvas.getContext("2d");
 const dotBezierPoint2 = document.querySelector('.bezier-point[name="p2"]');
 const dotBezierPoint3 = document.querySelector('.bezier-point[name="p3"]');
 
+// get color variable from root
+const root = document.querySelector(":root");
+const dotBezierColor =
+  getComputedStyle(root).getPropertyValue("--dot-bezier-color");
+
 dotSizeBezierCanvas.width = dotSizeBezierArea.clientWidth;
 dotSizeBezierCanvas.height = dotSizeBezierArea.clientHeight;
-console.log(`${dotSizeBezierCanvas.width}px`);
 dotBezierPoint2.style.left = `${dotSizeBezierCanvas.width / 2}px`;
 dotBezierPoint2.style.top = `${dotSizeBezierCanvas.height * 0.2}px`;
 dotBezierPoint3.style.left = `${dotSizeBezierCanvas.width / 2}px`;
@@ -25,7 +29,7 @@ let p3 = [
 ];
 let p4 = [dotSizeBezierCanvas.width, 0];
 
-DrawDotBezierCurve();
+SetDotBezierCurve();
 let currentDraggingBezierPoint = null;
 dotSizeBezierArea.addEventListener("mousedown", (e) => {
   const bezierPoint = e.target.closest(".bezier-point");
@@ -37,19 +41,21 @@ document.addEventListener("mousemove", (e) => {
   let x = e.clientX - dotSizeBezierArea.offsetLeft;
   let y = e.clientY - dotSizeBezierArea.offsetTop;
   if (x < 0) x = 0;
-  if (x > dotSizeBezierCanvas.width) x = dotSizeBezierCanvas.width;
+  if (x > dotSizeBezierArea.getBoundingClientRect().width)
+    x = dotSizeBezierArea.getBoundingClientRect().width;
   if (y < 0) y = 0;
-  if (y > dotSizeBezierCanvas.height) y = dotSizeBezierCanvas.height;
+  if (y > dotSizeBezierArea.getBoundingClientRect().height)
+    y = dotSizeBezierArea.getBoundingClientRect().height;
   currentDraggingBezierPoint.style.left = `${x}px`;
   currentDraggingBezierPoint.style.top = `${y}px`;
 
-  DrawDotBezierCurve();
+  SetDotBezierCurve();
 });
 document.addEventListener("mouseup", (e) => {
   currentDraggingBezierPoint = null;
 });
 
-function DrawDotBezierCurve() {
+function SetDotBezierCurve() {
   dotSizeBezierCanvasContext.clearRect(
     0,
     0,
@@ -85,7 +91,14 @@ function DrawDotBezierCurve() {
     "rgba(255, 255, 255, 0.4)",
     1
   );
-  help.DrawBezierCurve(dotSizeBezierCanvasContext, p1, p2, p3, p4, "red");
+  help.DrawBezierCurve(
+    dotSizeBezierCanvasContext,
+    p1,
+    p2,
+    p3,
+    p4,
+    `${dotBezierColor}`
+  );
 }
 
 function GetDotSizeBezierCurve(t) {

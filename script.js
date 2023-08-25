@@ -11,17 +11,15 @@ import {
 } from "./imageFunctions.js";
 import * as valueSettings from "./settings.js";
 import * as dotBezier from "./dotSizeBezier.js";
-console.log(dotBezier.GetDotSizeBezierCurve(0));
-console.log(dotBezier.GetDotSizeBezierCurve(0.25));
-console.log(dotBezier.GetDotSizeBezierCurve(0.5));
-console.log(dotBezier.GetDotSizeBezierCurve(0.75));
-console.log(dotBezier.GetDotSizeBezierCurve(1));
 
 const input_img_element = document.getElementById("input-image");
 const canvas = document.getElementById("input-image-preview");
 const canvasContext = canvas.getContext("2d");
 const dotsAreaCanvas = document.getElementById("dots-area");
 const dotsAreaCanvasContext = dotsAreaCanvas.getContext("2d");
+
+const minDotSizeSlider = document.getElementById("min-dot-size-slider");
+const maxDotSizeSlider = document.getElementById("max-dot-size-slider");
 
 // settings elements
 const isColored_element = document.getElementById("IsColoredCheck");
@@ -38,8 +36,6 @@ const {
   CELL_SIZE,
   dotsToAdd,
   dotSpeed,
-  minDotRadius,
-  maxDotRadius,
   radiusChangeRate,
   collisionRadiusMultiplier,
   steeringStrength,
@@ -56,9 +52,10 @@ const {
 } = valueSettings.currentSettings;
 
 // stuff you can change with ui
-let { colored } = valueSettings.currentSettings;
+let { colored, minDotRadius, maxDotRadius } = valueSettings.currentSettings;
 
 input_img_element.addEventListener("change", (e) => {
+  if (e.target.files.length === 0) return;
   dotDictionary = {};
   createReader(e.target.files[0], function () {
     // Loop through each pixel
@@ -80,6 +77,13 @@ input_img_element.addEventListener("change", (e) => {
     addDots();
     moveDots();
   });
+});
+
+minDotSizeSlider.addEventListener("input", (e) => {
+  minDotRadius = minDotSizeSlider.value / 1000;
+});
+maxDotSizeSlider.addEventListener("input", (e) => {
+  maxDotRadius = maxDotSizeSlider.value;
 });
 
 isColored_element.addEventListener("change", (e) => {

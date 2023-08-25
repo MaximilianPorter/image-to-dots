@@ -1,19 +1,25 @@
 :root {
-  --federal-blue: #03045eff;
-  --marian-blue: #023e8aff;
-  --honolulu-blue: #0077b6ff;
-  --blue-green: #0096c7ff;
-  --pacific-cyan: #00b4d8ff;
-  --vivid-sky-blue: #48cae4ff;
-  --non-photo-blue: #90e0efff;
-  --non-photo-blue-2: #ade8f4ff;
-  --light-cyan: #caf0f8ff;
-  --oxford-blue: #00132dff;
-  --oxford-blue-2: #00193bff;
-  --oxford-blue-3: #001e45ff;
-  --oxford-blue-4: #002657ff;
-  --berkeley-blue: #002d67ff;
-  --yale-blue: #00377eff;
+  /* https://coolors.co/palette/edae49-d1495b-00798c-30638e-003d5b */
+  --color0: #edae49ff;
+  --color0_dark: #ca8e2c;
+  --color0_light: #f2c87aff;
+  --color1: #d1495bff;
+  --color1_dark: #a83244;
+  --color1_light: #e17b8cff;
+  --color2: #00798cff;
+  --color2_dark: #005c6b;
+  --color2_light: #4ba3baff;
+  --color3: #30638eff;
+  --color3_dark: #1f4a5d;
+  --color3_light: #5c8fa8ff;
+  --color4: #003d5bff;
+  --color4_dark: #002b44;
+  --color4_light: #4d6e8aff;
+
+  --text_light: #f2f2f2ff;
+  --text--dark: #1a1a1aff;
+
+  --dot-bezier-color: var(--color0);
 }
 
 *,
@@ -31,8 +37,18 @@ html {
 body {
   font-family: "Source Code Pro", monospace;
   font-size: 1.6rem;
-  color: var(--light-cyan);
-  background-color: var(--oxford-blue);
+  color: var(--text_light);
+  background-color: var(--color4_dark);
+
+  /* disable highlighting */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  overflow: hidden;
 }
 
 #background {
@@ -43,16 +59,29 @@ body {
 }
 
 #input-image-label {
-  display: block;
   text-align: center;
-}
-#input-image {
   display: block;
+
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
   margin: 0 auto;
-  background-color: var(--honolulu-blue);
+  width: max-content;
+  background-color: var(--color1);
   border-radius: 5px;
 
-  margin-bottom: 1rem;
+  margin: 1rem auto;
+
+  padding: 1rem;
+
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+#input-image-label:hover {
+  background-color: var(--color1_light);
+}
+#input-image {
+  display: none;
 }
 
 #input-image-preview {
@@ -79,6 +108,12 @@ body {
 
   border-radius: 20px;
 
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin-top: 5rem;
+
   /* cool blue filter */
   /* filter: sepia(100%) hue-rotate(180deg) saturate(1000%) brightness(100%); */
 }
@@ -91,24 +126,48 @@ body {
 }
 
 .settings {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 1rem;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 1rem;
   margin-bottom: 1rem;
+}
+
+#colored-checkbox-label {
+}
+#colored-checkbox-label input {
 }
 
 #dot-size-bezier {
   height: 5rem;
   width: 20rem;
 
-  background-color: var(--honolulu-blue);
+  background-color: var(--color3_dark);
   position: relative;
+
+  border-radius: 5px;
+  border: 1px solid var(--color3_light);
 }
 #dot-size-bezier--canvas {
   pointer-events: none;
   width: 100%;
   height: 100%;
+}
+.dot-size-bezier--canvas-overflow {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+
+  border-radius: inherit;
 }
 .bezier-point {
   cursor: pointer;
@@ -120,11 +179,45 @@ body {
   height: 1rem;
   width: 1rem;
   border-radius: 50%;
-  background-color: var(--light-cyan);
+  background-color: var(--color0);
   opacity: 0.5;
 }
 .bezier-point:hover {
   opacity: 1;
+}
+
+.slider--input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 1rem;
+  border-radius: 5px;
+  background-color: var(--color3_dark);
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
+}
+.slider--input:hover {
+  opacity: 1;
+}
+.slider--input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background-color: var(--color0);
+  cursor: pointer;
+}
+.slider--input::-moz-range-thumb {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  border-radius: 50%;
+  background-color: var(--color0);
+  cursor: pointer;
 }
 
 @media (width < 1000px) {
