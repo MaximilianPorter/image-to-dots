@@ -50,12 +50,12 @@ class Debug_Settings extends Settings {
   constructor() {
     super();
     this.isDrawingDebug = true;
-    this.dotSpeed = 2;
+    this.dotSpeed = 0.5;
 
-    // this.centeringFactor = 0; // .1
-    // this.alignmentFactor = 0.1; // .2
-    // this.separationFactor = 0.5;
-    // this.radiusChangeRate = 0.01;
+    this.centeringFactor = 0.1; // .1
+    this.alignmentFactor = 0.1; // .2
+    this.turnTowardsLightFactor = 0.001;
+    this.separationFactor = 1;
   }
 }
 const debugSettings = new Debug_Settings();
@@ -63,10 +63,10 @@ const debugSettings = new Debug_Settings();
 class MoreDots_Settings extends Settings {
   constructor() {
     super();
-    // this.isDrawingDebug = true;
-    this.CELL_SIZE = 50;
+    this.isDrawingDebug = true;
+    this.CELL_SIZE = 20; // i think this works best at 30, but it's slow
     this.dotsToAdd = 5000;
-    this.dotSpeed = 1;
+    this.dotSpeed = 0.9;
     this.maxDotRadius = 10;
     this.minDotRadius = 0.001;
     this.centeringFactor = 0.1; // .1

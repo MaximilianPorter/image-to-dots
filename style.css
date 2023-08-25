@@ -76,6 +76,8 @@ body {
   max-width: 90vw;
 
   margin: 0 auto;
+
+  border-radius: 20px;
 }
 
 .preview-images {

@@ -55,6 +55,18 @@ function getDarkestValueInImage(imageData) {
   return darkestValue;
 }
 
+function getLightestValueInImage(imageData) {
+  let lightestValue = 0;
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    const pixelValue = imageData.data[i] / 255;
+    if (pixelValue > lightestValue) {
+      lightestValue = pixelValue;
+    }
+  }
+
+  return lightestValue;
+}
+
 function greyscaleData(data) {
   for (let i = 0; i < data.length; i += 4) {
     const red = data[i]; // Red component of the pixel
@@ -79,5 +91,6 @@ export {
   getPixelValue,
   getAveragePixelValue,
   getDarkestValueInImage,
+  getLightestValueInImage,
   greyscaleData,
 };
