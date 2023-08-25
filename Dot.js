@@ -15,7 +15,7 @@ class Dot {
     this.position = position;
     this.radius = radius;
     this.startMoveSpeed = moveSpeed;
-    this.accelleration = 0.0005;
+    this.accelleration = 0.001;
     this.detectionRadius = detectionRadius;
     this.collisionRadius = collisionRadius;
     this.gridPosition = {
@@ -25,6 +25,10 @@ class Dot {
     this.cellSize = cellSize;
 
     this.lastPosition = position;
+    this.lastGridPosition = {
+      x: 0,
+      y: 0,
+    };
   }
 
   updatePosition() {
@@ -43,8 +47,30 @@ class Dot {
   }
 
   updateGridPosition() {
-    this.gridPosition.x = Math.floor(this.position[0] / this.cellSize);
-    this.gridPosition.y = Math.floor(this.position[1] / this.cellSize);
+    this.lastGridPosition = this.gridPosition;
+
+    const desiredGridPosition = {
+      x: Math.floor(this.position[0] / this.cellSize),
+      y: Math.floor(this.position[1] / this.cellSize),
+    };
+
+    if (desiredGridPosition.x < 0) {
+      desiredGridPosition.x = 0;
+    }
+    if (desiredGridPosition.y < 0) {
+      desiredGridPosition.y = 0;
+    }
+
+    this.gridPosition = desiredGridPosition;
+
+    if (
+      this.gridPosition.x !== this.lastGridPosition.x ||
+      this.gridPosition.y !== this.lastGridPosition.y
+    ) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
 

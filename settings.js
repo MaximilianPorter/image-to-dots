@@ -1,0 +1,67 @@
+class Settings {
+  constructor(
+    CELL_SIZE = 50,
+    dotsToAdd = 500,
+    dotSpeed = 0.2,
+    maxDotRadius = 10,
+    minDotRadius = 3,
+    bounceDamper = 0.7,
+    decelleration = 0.008,
+    radiusChangeRate = 0.1,
+    darknessRespawnThreshold = 0.05,
+    bounceOffForce = 0.4,
+    steeringStrength = 0.05,
+    minSpeedPercentage = 0.15,
+    debugDetectionRadius = maxDotRadius + 50,
+    colored = false,
+    centeringFactor = 0.05,
+    alignmentFactor = 0.8,
+    separationFactor = 0.1,
+    visionDotProductThreshold = -0.5,
+    slowDotProductThreshold = 0.5
+  ) {
+    this.CELL_SIZE = CELL_SIZE;
+    this.dotsToAdd = dotsToAdd;
+    this.dotSpeed = dotSpeed;
+    this.maxDotRadius = maxDotRadius;
+    this.minDotRadius = minDotRadius;
+    this.bounceDamper = bounceDamper;
+    this.decelleration = decelleration;
+    this.radiusChangeRate = radiusChangeRate;
+    this.darknessRespawnThreshold = darknessRespawnThreshold;
+    this.bounceOffForce = bounceOffForce;
+    this.steeringStrength = steeringStrength;
+    this.minSpeedPercentage = minSpeedPercentage;
+    this.debugDetectionRadius = debugDetectionRadius;
+    this.colored = colored;
+    this.centeringFactor = centeringFactor;
+    this.alignmentFactor = alignmentFactor;
+    this.separationFactor = separationFactor;
+    this.visionDotProductThreshold = visionDotProductThreshold;
+    this.slowDotProductThreshold = slowDotProductThreshold;
+  }
+}
+
+class Debug_Settings extends Settings {
+  constructor() {
+    super();
+    this.dotSpeed = 0.5;
+  }
+}
+const debugSettings = new Debug_Settings();
+
+class MoreDots_Settings extends Settings {
+  constructor() {
+    super();
+    this.CELL_SIZE = 10;
+    this.dotsToAdd = 5000;
+    this.maxDotRadius = 3;
+    this.minDotRadius = 0.01;
+    this.centeringFactor = 0.1;
+    this.alignmentFactor = 0.2;
+    this.separationFactor = 0.5;
+  }
+}
+const moreDotsSettings = new MoreDots_Settings();
+
+export { debugSettings, moreDotsSettings };

@@ -22,11 +22,12 @@ function Lerp(a, b, t) {
 }
 
 function DotProduct(vector1, vector2) {
-  let result = 0;
-  for (let i = 0; i < vector1.length; i++) {
-    result += vector1[i] * vector2[i];
-  }
-  return result;
+  // Normalize the vectors
+  const norm1 = NormalizeVector(vector1);
+  const norm2 = NormalizeVector(vector2);
+
+  // Calculate the dot product
+  return norm1[0] * norm2[0] + norm1[1] * norm2[1];
 }
 
 function drawCircle(ctx, x, y, radius, fill, stroke, strokeWidth) {
