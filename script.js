@@ -189,32 +189,39 @@ function DrawDot(dot) {
     y: position[1] / dotsAreaCanvas.height,
   };
 
-  let colorString = "white";
+  let colorToDraw = {
+    red: 255,
+    green: 255,
+    blue: 255,
+  };
   if (colored) {
     const apColor = getApproximatePixelColor(
       positionPercent.x,
       positionPercent.y,
       uploadedImageData
     );
-
-    dot.color = {
-      r: dot.color.r + (apColor.red - dot.color.r) * colorChangeRate,
-      g: dot.color.g + (apColor.green - dot.color.g) * colorChangeRate,
-      b: dot.color.b + (apColor.blue - dot.color.b) * colorChangeRate,
-    };
-
-    colorString = `rgb(${dot.color.r}, ${dot.color.g}, ${dot.color.b})`;
+    colorToDraw = apColor;
   }
 
+  const lerpedColor = {
+    r: dot.color.r + (colorToDraw.red - dot.color.r) * colorChangeRate,
+    g: dot.color.g + (colorToDraw.green - dot.color.g) * colorChangeRate,
+    b: dot.color.b + (colorToDraw.blue - dot.color.b) * colorChangeRate,
+  };
+
+  dot.color = lerpedColor;
+
+  const colorString = `rgb(${dot.color.r}, ${dot.color.g}, ${dot.color.b})`;
+
   // draw first dot red
-  const dotColor = dot.id === 0 && isDrawingDebug ? "red" : "white";
+  const dotColor = dot.id === 0 && isDrawingDebug ? "red" : colorString;
 
   drawCircle(
     dotsAreaCanvasContext,
     position[0],
     position[1],
     radius,
-    colored ? colorString : dotColor,
+    dotColor,
     null,
     2
   );
