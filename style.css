@@ -78,6 +78,9 @@ body {
   margin: 0 auto;
 
   border-radius: 20px;
+
+  /* cool blue filter */
+  /* filter: sepia(100%) hue-rotate(180deg) saturate(1000%) brightness(100%); */
 }
 
 .preview-images {

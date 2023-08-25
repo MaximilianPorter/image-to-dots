@@ -33,6 +33,7 @@ let uploadedImageData;
 let grid = {};
 let darkestPixelValue = 1;
 let brightestPixelValue = 0;
+const colorChangeRate = 0.2;
 
 let dotDictionary = {};
 const {
@@ -187,13 +188,23 @@ function DrawDot(dot) {
     x: position[0] / dotsAreaCanvas.width,
     y: position[1] / dotsAreaCanvas.height,
   };
-  const apColor = getApproximatePixelColor(
-    positionPercent.x,
-    positionPercent.y,
-    uploadedImageData
-  );
 
-  const colorString = `rgba(${apColor.red}, ${apColor.green}, ${apColor.blue}, ${apColor.alpha})`;
+  let colorString = "white";
+  if (colored) {
+    const apColor = getApproximatePixelColor(
+      positionPercent.x,
+      positionPercent.y,
+      uploadedImageData
+    );
+
+    dot.color = {
+      r: dot.color.r + (apColor.red - dot.color.r) * colorChangeRate,
+      g: dot.color.g + (apColor.green - dot.color.g) * colorChangeRate,
+      b: dot.color.b + (apColor.blue - dot.color.b) * colorChangeRate,
+    };
+
+    colorString = `rgb(${dot.color.r}, ${dot.color.g}, ${dot.color.b})`;
+  }
 
   // draw first dot red
   const dotColor = dot.id === 0 && isDrawingDebug ? "red" : "white";

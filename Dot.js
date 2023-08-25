@@ -24,6 +24,11 @@ class Dot {
     };
     this.cellSize = cellSize;
 
+    this.color = {
+      r: 255,
+      g: 255,
+      b: 255,
+    };
     this.lastPosition = position;
     this.lastGridPosition = {
       x: 0,
