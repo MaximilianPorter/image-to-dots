@@ -4,6 +4,7 @@ import {
   Clamp,
   NormalizeVector,
   VectorMagnitude,
+  SquareVectorMagnitude,
   VectorDirection,
   DotProduct,
   Lerp,
@@ -44,6 +45,7 @@ const {
   minDotRadius,
   maxDotRadius,
   radiusChangeRate,
+  collisionRadiusMultiplier,
   steeringStrength,
   decelleration,
   minSpeedPercentage,
@@ -455,7 +457,7 @@ function UpdateDotRadius(dot) {
   dot.radius += (desiredRadius - radius) * radiusChangeRate;
 
   dot.detectionRadius = dot.radius + CELL_SIZE * (dot.moveSpeed / dotSpeed);
-  dot.collisionRadius = dot.detectionRadius / 2;
+  dot.collisionRadius = dot.detectionRadius * collisionRadiusMultiplier;
 
   // const smallestRadiusForRespawn = Lerp(
   //   darkestPixelValue,
@@ -472,9 +474,9 @@ function HandleDotCollision(dot) {
   const dotsInNeighboringCells = getDotsInNeighboringCells(dot);
   // const dotsInNeighboringCells = Object.values(dotDictionary);
   const direction = SteerDirection(dot, dotsInNeighboringCells);
-  dot.moveDirection = NormalizeVector(
-    dot.moveDirection.map((dir, i) => dir + direction[i] * steeringStrength)
-  );
+  dot.moveDirection = dot.moveDirection.map((dir, i) => {
+    return Clamp(dir + direction[i] * steeringStrength, -1, 1);
+  });
 
   MoveDotToOtherEdge(dot);
 }
@@ -500,12 +502,26 @@ function SteerDirection(dot, otherDots) {
     let otherDotPosition = AdjustPositionForOppositeSide(dot, otherDot);
 
     const dotsVector = VectorDirection(dot.position, otherDotPosition);
-    const distance = VectorMagnitude(dotsVector);
-
-    if (distance > detectionRadius) continue;
-
-    // check dot product between moveDirection and vector between dots
+    // const distance = VectorMagnitude(dotsVector);
+    const distance2 = SquareVectorMagnitude(dotsVector);
     const dotProduct = DotProduct(moveDirection, dotsVector);
+
+    // slow down if close to other dot
+    if (
+      distance2 <= collisionRadius * collisionRadius &&
+      dotProduct > slowDotProductThreshold
+    ) {
+      dot.moveSpeed = Clamp(
+        dot.moveSpeed -
+          decelleration *
+            Lerp(0.5, 1, dot.radius / maxDotRadius) *
+            Lerp(1, 0, distance2 / (collisionRadius * collisionRadius)),
+        dotSpeed * minSpeedPercentage,
+        dotSpeed
+      );
+    }
+
+    if (distance2 > detectionRadius * detectionRadius) continue;
 
     const inVisionCone = dotProduct > visionDotProductThreshold;
     if (!inVisionCone) continue;
@@ -515,32 +531,19 @@ function SteerDirection(dot, otherDots) {
     yposAvg += otherDotPosition[1];
     dotsVisible++;
 
-    // slow down if close to other dot
-    if (distance <= detectionRadius && dotProduct > slowDotProductThreshold) {
-      dot.moveSpeed = Clamp(
-        dot.moveSpeed -
-          decelleration *
-            Lerp(0, 2, dot.radius / maxDotRadius) *
-            Lerp(1, 0, distance / detectionRadius),
-        dotSpeed * minSpeedPercentage,
-        dotSpeed
-      );
-    }
-
     if (dot.id === 0) {
       DebugDrawLinePositions(dot.position, otherDotPosition);
     }
 
-    // turn away from other dot
-    const ratio = 1 - Clamp(distance / detectionRadius, 0, 1);
-    direction = direction.map(
-      (dir, i) => dir - dotsVector[i] * ratio * separationFactor
-    );
-
-    // align with other dot
-    direction = direction.map(
-      (dir, i) => dir + otherDot.moveDirection[i] * alignmentFactor
-    );
+    const ratio =
+      1 - Clamp(distance2 / (detectionRadius * detectionRadius), 0, 1);
+    direction = direction.map((dir, i) => {
+      // turn away from other dot
+      dir -= dotsVector[i] * ratio * separationFactor;
+      // align with other dot
+      dir += otherDot.moveDirection[i] * alignmentFactor;
+      return dir;
+    });
   }
 
   // turn towards larger dots
@@ -601,19 +604,25 @@ function TurnAwayFromEdges(dot, direction) {
     leftEdgeVector,
     rightEdgeVector,
   ].reduce((prev, curr) => {
-    const prevDistance = VectorMagnitude(VectorDirection(dot.position, prev));
-    const currDistance = VectorMagnitude(VectorDirection(dot.position, curr));
-    return prevDistance < currDistance ? prev : curr;
+    const prevDistance2 = SquareVectorMagnitude(
+      VectorDirection(dot.position, prev)
+    );
+    const currDistance2 = SquareVectorMagnitude(
+      VectorDirection(dot.position, curr)
+    );
+    return prevDistance2 < currDistance2 ? prev : curr;
   });
 
   // check if dot is close to edge
-  const edgeDistance = VectorMagnitude(
+  const edgeDistance = SquareVectorMagnitude(
     VectorDirection(dot.position, closestEdgeVector)
   );
-  if (edgeDistance < dot.detectionRadius) {
+  if (edgeDistance < dot.detectionRadius * dot.detectionRadius) {
     const edgeVector = VectorDirection(dot.position, closestEdgeVector);
     direction = direction.map(
-      (dir, i) => dir + edgeVector[i] * 0.8 * (1 - edgeDistance / dot.radius)
+      (dir, i) =>
+        dir +
+        edgeVector[i] * 0.8 * (1 - edgeDistance / (dot.radius * dot.radius))
     );
     if (dot.id === 0 && isDrawingDebug) {
       drawLine(

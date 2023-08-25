@@ -36,10 +36,10 @@ body {
 }
 
 #background {
-  height: 100vh;
+  /* height: 100vh;
   background: repeat radial-gradient(#00193b99 9%, transparent 9%);
   background-position: 0% 0%;
-  background-size: 50px 50px;
+  background-size: 50px 50px; */
 }
 
 #input-image-label {

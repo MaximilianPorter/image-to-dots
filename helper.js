@@ -10,6 +10,9 @@ function NormalizeVector(vector) {
 function VectorMagnitude(vector) {
   return Math.sqrt(vector[0] * vector[0] + vector[1] * vector[1]);
 }
+function SquareVectorMagnitude(vector) {
+  return vector[0] * vector[0] + vector[1] * vector[1];
+}
 
 function VectorDirection(from, to) {
   const x = to[0] - from[0];
@@ -59,6 +62,7 @@ export {
   Clamp,
   NormalizeVector,
   VectorMagnitude,
+  SquareVectorMagnitude,
   VectorDirection,
   DotProduct,
   Lerp,

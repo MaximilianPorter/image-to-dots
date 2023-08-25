@@ -9,6 +9,7 @@ class Settings {
     bounceDamper = 0.7,
     decelleration = 0.008,
     radiusChangeRate = 0.1,
+    collisionRadiusMultiplier = 1.1,
     darknessRespawnThreshold = 0.05,
     bounceOffForce = 0.4,
     steeringStrength = 0.05,
@@ -31,6 +32,7 @@ class Settings {
     this.bounceDamper = bounceDamper;
     this.decelleration = decelleration;
     this.radiusChangeRate = radiusChangeRate;
+    this.collisionRadiusMultiplier = collisionRadiusMultiplier;
     this.darknessRespawnThreshold = darknessRespawnThreshold;
     this.bounceOffForce = bounceOffForce;
     this.steeringStrength = steeringStrength;
@@ -50,8 +52,13 @@ class Debug_Settings extends Settings {
   constructor() {
     super();
     this.isDrawingDebug = true;
-    this.dotSpeed = 0.5;
+    // this.dotSpeed = 0.5;
 
+    this.CELL_SIZE = 50; // i think this works best at 30, but it's slow
+    // this.dotsToAdd = 5000;
+    this.dotSpeed = 0.9;
+    this.maxDotRadius = 10;
+    this.minDotRadius = 0.001;
     this.centeringFactor = 0.1; // .1
     this.alignmentFactor = 0.1; // .2
     this.turnTowardsLightFactor = 0.001;
@@ -63,7 +70,7 @@ const debugSettings = new Debug_Settings();
 class MoreDots_Settings extends Settings {
   constructor() {
     super();
-    // this.isDrawingDebug = true;
+    this.isDrawingDebug = true;
     this.CELL_SIZE = 20; // i think this works best at 30, but it's slow
     this.dotsToAdd = 5000;
     this.dotSpeed = 0.9;
