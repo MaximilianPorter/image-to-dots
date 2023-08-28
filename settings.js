@@ -20,6 +20,7 @@ class Settings {
     alignmentFactor = 0.8,
     separationFactor = 0.1,
     turnTowardsLightFactor = 0.01,
+    steerFromMouseFactor = 5,
     visionDotProductThreshold = -0.5,
     slowDotProductThreshold = 0.5
   ) {
@@ -43,6 +44,7 @@ class Settings {
     this.alignmentFactor = alignmentFactor;
     this.separationFactor = separationFactor;
     this.turnTowardsLightFactor = turnTowardsLightFactor;
+    this.steerFromMouseFactor = steerFromMouseFactor;
     this.visionDotProductThreshold = visionDotProductThreshold;
     this.slowDotProductThreshold = slowDotProductThreshold;
   }
@@ -76,8 +78,8 @@ class MoreDots_Settings extends Settings {
     this.dotSpeed = 0.9;
     this.maxDotRadius = 10;
     this.minDotRadius = 0.001;
-    this.centeringFactor = 0.1;
-    this.alignmentFactor = 0.1;
+    this.centeringFactor = 0.1; //.1
+    this.alignmentFactor = 0.1; // .1
     this.turnTowardsLightFactor = 0.001;
     this.separationFactor = 1;
     // this.radiusChangeRate = 0.01;

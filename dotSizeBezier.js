@@ -38,14 +38,13 @@ dotSizeBezierArea.addEventListener("mousedown", (e) => {
 });
 document.addEventListener("mousemove", (e) => {
   if (!currentDraggingBezierPoint) return;
-  let x = e.clientX - dotSizeBezierArea.offsetLeft;
-  let y = e.clientY - dotSizeBezierArea.offsetTop;
+  const rect = dotSizeBezierArea.getBoundingClientRect();
+  let x = e.clientX - rect.left;
+  let y = e.clientY - rect.top;
   if (x < 0) x = 0;
-  if (x > dotSizeBezierArea.getBoundingClientRect().width)
-    x = dotSizeBezierArea.getBoundingClientRect().width;
+  if (x > rect.width) x = rect.width;
   if (y < 0) y = 0;
-  if (y > dotSizeBezierArea.getBoundingClientRect().height)
-    y = dotSizeBezierArea.getBoundingClientRect().height;
+  if (y > rect.height) y = rect.height;
   currentDraggingBezierPoint.style.left = `${x}px`;
   currentDraggingBezierPoint.style.top = `${y}px`;
 

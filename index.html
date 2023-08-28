@@ -30,40 +30,109 @@
         alt="missing image"
         accept="image/*"
       />
-      <section class="settings">
-        <label for="IsColoredCheck" id="colored-checkbox-label"
-          >Colored
-          <input type="checkbox" name="isColored" id="IsColoredCheck" />
-        </label>
-        <div id="dot-size-bezier">
-          <div class="dot-size-bezier--canvas-overflow">
-            <canvas id="dot-size-bezier--canvas"></canvas>
-          </div>
-          <div class="bezier-point" name="p2"></div>
-          <div class="bezier-point" name="p3"></div>
+      <section class="settings settings-collapsed">
+        <div class="settings-header">
+          <h2>Settings</h2>
+          <ion-icon name="settings" class="settings-icon"></ion-icon>
+          <ion-icon
+            name="caret-forward-outline"
+            class="settings-dropdown-button"
+          ></ion-icon>
         </div>
-        <label for="min-dot-size-slider">
-          Min Dot Size
-          <input
-            type="range"
-            min="1"
-            max="30000"
-            value="1"
-            class="slider--input"
-            id="min-dot-size-slider"
-          />
-        </label>
-        <label for="max-dot-size-slider">
-          Max Dot Size
-          <input
-            type="range"
-            min="1"
-            max="40"
-            value="10"
-            class="slider--input"
-            id="max-dot-size-slider"
-          />
-        </label>
+        <section class="settings-section">
+          <div class="settings-section--title">
+            <h3>Color Settings</h3>
+            <ion-icon
+              name="caret-forward-outline"
+              class="settings-section-dropdown-button"
+            ></ion-icon>
+          </div>
+
+          <label for="IsColoredCheck" id="colored-checkbox-label"
+            >Colored
+            <input type="checkbox" name="isColored" id="IsColoredCheck" />
+          </label>
+        </section>
+        <section class="settings-section">
+          <div class="settings-section--title">
+            <h3>Dot Size Settings</h3>
+            <ion-icon
+              name="caret-forward-outline"
+              class="settings-section-dropdown-button"
+            ></ion-icon>
+          </div>
+          <div id="dot-size-bezier">
+            <div class="dot-size-bezier--canvas-overflow">
+              <canvas id="dot-size-bezier--canvas"></canvas>
+            </div>
+            <div class="bezier-point" name="p2"></div>
+            <div class="bezier-point" name="p3"></div>
+          </div>
+          <label for="min-dot-size-slider" class="slider-label">
+            Min Dot Size
+            <input
+              type="range"
+              min="1"
+              max="30000"
+              value="1"
+              class="slider--input"
+              id="min-dot-size-slider"
+            />
+          </label>
+          <label for="max-dot-size-slider" class="slider-label">
+            Max Dot Size
+            <input
+              type="range"
+              min="1"
+              max="40"
+              value="10"
+              class="slider--input"
+              id="max-dot-size-slider"
+            />
+          </label>
+        </section>
+        <section class="settings-section">
+          <div class="settings-section--title">
+            <h3>Boid Settings</h3>
+            <ion-icon
+              name="caret-forward-outline"
+              class="settings-section-dropdown-button"
+            ></ion-icon>
+          </div>
+          <label for="separation-slider" class="slider-label">
+            Separation Factor
+            <input
+              type="range"
+              min="0"
+              max="200"
+              value="10"
+              class="slider--input"
+              id="separation-slider"
+            />
+          </label>
+          <label for="centering-slider" class="slider-label">
+            Centering Factor
+            <input
+              type="range"
+              min="0"
+              max="200"
+              value="10"
+              class="slider--input"
+              id="centering-slider"
+            />
+          </label>
+          <label for="alignment-slider" class="slider-label">
+            Alignment Factor
+            <input
+              type="range"
+              min="0"
+              max="200"
+              value="10"
+              class="slider--input"
+              id="alignment-slider"
+            />
+          </label>
+        </section>
       </section>
 
       <div class="preview-images">
@@ -71,5 +140,14 @@
         <canvas id="dots-area"></canvas>
       </div>
     </div>
+
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
+    ></script>
   </body>
 </html>

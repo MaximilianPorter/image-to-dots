@@ -11,6 +11,7 @@ import {
 } from "./imageFunctions.js";
 import * as valueSettings from "./settings.js";
 import * as dotBezier from "./dotSizeBezier.js";
+import "./settingsSection.js";
 
 const input_img_element = document.getElementById("input-image");
 const canvas = document.getElementById("input-image-preview");
@@ -20,6 +21,10 @@ const dotsAreaCanvasContext = dotsAreaCanvas.getContext("2d");
 
 const minDotSizeSlider = document.getElementById("min-dot-size-slider");
 const maxDotSizeSlider = document.getElementById("max-dot-size-slider");
+
+const separationSlider = document.getElementById("separation-slider");
+const alignmentSlider = document.getElementById("alignment-slider");
+const centeringSlider = document.getElementById("centering-slider");
 
 // settings elements
 const isColored_element = document.getElementById("IsColoredCheck");
@@ -43,16 +48,25 @@ const {
   minSpeedPercentage,
   darknessRespawnThreshold,
   debugDetectionRadius,
-  centeringFactor,
-  alignmentFactor,
-  separationFactor,
   turnTowardsLightFactor,
+  steerFromMouseFactor,
   visionDotProductThreshold,
   slowDotProductThreshold,
 } = valueSettings.currentSettings;
 
 // stuff you can change with ui
-let { colored, minDotRadius, maxDotRadius } = valueSettings.currentSettings;
+let {
+  colored,
+  minDotRadius,
+  maxDotRadius,
+  centeringFactor,
+  alignmentFactor,
+  separationFactor,
+} = valueSettings.currentSettings;
+
+separationSlider.value = separationFactor * 100;
+alignmentSlider.value = alignmentFactor * 100;
+centeringSlider.value = centeringFactor * 100;
 
 input_img_element.addEventListener("change", (e) => {
   if (e.target.files.length === 0) return;
@@ -85,9 +99,51 @@ minDotSizeSlider.addEventListener("input", (e) => {
 maxDotSizeSlider.addEventListener("input", (e) => {
   maxDotRadius = maxDotSizeSlider.value;
 });
+separationSlider.addEventListener("input", (e) => {
+  separationFactor = separationSlider.value / 100;
+});
+alignmentSlider.addEventListener("input", (e) => {
+  alignmentFactor = alignmentSlider.value / 100;
+});
+centeringSlider.addEventListener("input", (e) => {
+  centeringFactor = centeringSlider.value / 100;
+});
 
 isColored_element.addEventListener("change", (e) => {
   colored = e.target.checked;
+});
+
+let canvasMousePosition = null;
+let draggingMouse = false;
+dotsAreaCanvas.addEventListener("mousedown", (e) => {
+  draggingMouse = true;
+});
+dotsAreaCanvas.addEventListener("mousemove", (e) => {
+  if (!draggingMouse) return;
+  const rect = dotsAreaCanvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const percent = {
+    x: x / rect.width,
+    y: y / rect.height,
+  };
+  canvasMousePosition = [
+    percent.x * dotsAreaCanvas.width,
+    percent.y * dotsAreaCanvas.height,
+  ];
+  help.drawCircle(
+    dotsAreaCanvasContext,
+    canvasMousePosition.x,
+    canvasMousePosition.y,
+    5,
+    "red",
+    null,
+    2
+  );
+});
+document.addEventListener("mouseup", (e) => {
+  draggingMouse = false;
+  canvasMousePosition = null;
 });
 
 function createReader(file, whenReady) {
@@ -478,9 +534,13 @@ function HandleDotCollision(dot) {
   const dotsInNeighboringCells = getDotsInNeighboringCells(dot);
   // const dotsInNeighboringCells = Object.values(dotDictionary);
   const direction = SteerDirection(dot, dotsInNeighboringCells);
-  dot.moveDirection = dot.moveDirection.map((dir, i) => {
-    return help.Clamp(dir + direction[i] * steeringStrength, -1, 1);
-  });
+  // dot.moveDirection = dot.moveDirection.map((dir, i) => {
+  //   return help.Clamp(dir + direction[i] * steeringStrength, -1, 1);
+  // });
+  dot.moveDirection = help.NormalizeVector([
+    dot.moveDirection[0] + direction[0] * steeringStrength,
+    dot.moveDirection[1] + direction[1] * steeringStrength,
+  ]);
 
   MoveDotToOtherEdge(dot);
 }
@@ -548,6 +608,30 @@ function SteerDirection(dot, otherDots) {
       dir += otherDot.moveDirection[i] * alignmentFactor;
       return dir;
     });
+  }
+
+  // steer away from mouse
+  if (canvasMousePosition !== null) {
+    const maxMouseDist = 200;
+    const mouseVector = help.VectorDirection(dot.position, canvasMousePosition);
+    const mouseDist2 = help.SquareVectorMagnitude(mouseVector);
+    if (mouseDist2 < maxMouseDist * maxMouseDist) {
+      direction = direction.map(
+        (dir, i) =>
+          dir -
+          mouseVector[i] *
+            steerFromMouseFactor *
+            help.Lerp(1, 0, mouseDist2 / (maxMouseDist * maxMouseDist))
+      );
+      dot.position = dot.position.map(
+        (pos, i) =>
+          pos -
+          mouseVector[i] *
+            steerFromMouseFactor *
+            0.005 *
+            help.Lerp(1, 0, mouseDist2 / (maxMouseDist * maxMouseDist))
+      );
+    }
   }
 
   // turn towards larger dots

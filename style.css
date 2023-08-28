@@ -96,8 +96,6 @@ body {
 }
 
 #dots-area {
-  pointer-events: none;
-  position: relative;
   display: block;
   background-color: black;
 
@@ -130,21 +128,138 @@ body {
   top: 0;
   left: 0;
   z-index: 1;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.8);
   padding: 1rem;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: start;
   justify-content: center;
   gap: 1rem;
   margin-bottom: 1rem;
+
+  transition: all 0.3s ease-in-out;
+}
+
+.settings-collapsed {
+  transform: translateX(-100%);
+}
+
+.settings-header {
+  /* position: absolute;
+  top: 0;
+  left: 0; */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 1rem;
+  position: relative;
+}
+.settings-icon {
+  pointer-events: none;
+  opacity: 0;
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  height: 2rem;
+  width: 2rem;
+  transform: translate(125%, -50%);
+
+  transition: opacity 0.2s ease-in-out;
+}
+.settings-icon:hover {
+  color: var(--color1);
+  cursor: pointer;
+}
+.settings-dropdown-button {
+  cursor: pointer;
+  height: 2rem;
+  width: 2rem;
+  transform: rotate(180deg);
+
+  transition: all 0.1s ease-in-out;
+}
+
+.settings-dropdown-button:hover {
+  color: var(--color1);
+}
+.settings-collapsed .settings-icon {
+  pointer-events: all;
+  opacity: 1;
 }
 
 #colored-checkbox-label {
 }
 #colored-checkbox-label input {
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: start;
+  gap: 1rem;
+  width: 100%;
+  height: max-content;
+  position: relative;
+
+  border-radius: 5px;
+
+  padding: 1rem;
+  padding-left: 3rem;
+  overflow: hidden;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+
+  transition: all 0.3s ease-in-out;
+}
+.settings-section::before {
+  pointer-events: none;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color4);
+  opacity: 0.1;
+}
+
+.section-hidden {
+  height: 4rem !important;
+}
+
+.settings-section .settings-section-dropdown-button {
+  transition: transform 0.3s ease-in-out;
+}
+.section-hidden .settings-section-dropdown-button {
+  transform: rotate(0deg);
+}
+
+.settings-section--title {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 1rem;
+  position: relative;
+  transform: translateX(-2rem);
+
+  transition: all 0.1s ease-in-out;
+}
+.settings-section-dropdown-button {
+  color: inherit;
+  height: 1.6rem;
+  width: 1.6rem;
+  transform: rotate(90deg);
+}
+.settings-section--title:hover {
+  color: var(--color1);
+  cursor: pointer;
+}
+
+.slider-label {
+  width: 100%;
 }
 
 #dot-size-bezier {
@@ -187,6 +302,7 @@ body {
 }
 
 .slider--input {
+  cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
