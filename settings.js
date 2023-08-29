@@ -76,8 +76,8 @@ class MoreDots_Settings extends Settings {
     super();
     // this.isDrawingDebug = true;
     this.CELL_SIZE = 20; // i think this works best at 30, but it's slow
-    this.dotsToAdd = 5000;
-    this.dotSpeed = 0.9;
+    this.dotsToAdd = 3000;
+    this.dotSpeed = 0.5;
     this.maxDotRadius = 10;
     this.minDotRadius = 0.001;
     this.centeringFactor = 0.1; //.1

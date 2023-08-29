@@ -1,7 +1,10 @@
+// this helped: https://stackoverflow.com/questions/2916081/zoom-in-on-a-point-using-scale-and-translate
+
 const input_img_element = document.getElementById("input-image");
 const dotsAreaSection = document.querySelector(".dots-area-section");
 const canvas = document.getElementById("dots-area");
 const context = canvas.getContext("2d");
+const fpsSlider = document.getElementById("fps-slider");
 let mousePosOnCanvas = { x: 0, y: 0 };
 
 const zoomIntensity = 0.2;
@@ -11,7 +14,32 @@ let scale = 1;
 let originx = 0;
 let originy = 0;
 
+let middleMouseDelta = 0;
+let holdingMiddleMouse = false;
+let middleMouseStart = { x: 0, y: 0 };
+
+// detect mouse wheel click in
+document.addEventListener("mousedown", (event) => {
+  if (event.button === 1) {
+    holdingMiddleMouse = true;
+    middleMouseStart = { x: event.clientX, y: event.clientY };
+  }
+});
+document.addEventListener("mouseup", (event) => {
+  if (event.button === 1) holdingMiddleMouse = false;
+});
+
+function ListenForMiddleMouse() {
+  if (holdingMiddleMouse) {
+    zoomInOnMiddle({ deltaY: -1 }, middleMouseDelta / 1000);
+  }
+
+  setTimeout(ListenForMiddleMouse, 1000 / parseInt(fpsSlider.dataset.value));
+}
+ListenForMiddleMouse();
+
 document.addEventListener("mousemove", (event) => {
+  if (holdingMiddleMouse) middleMouseDelta = middleMouseStart.y - event.clientY;
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
@@ -36,6 +64,7 @@ document.addEventListener("wheel", (event) => {
 
 // check if canvas changed
 input_img_element.addEventListener("change", (e) => {
+  if (e.target.files.length === 0) return;
   const file = e.target.files[0];
   const reader = new FileReader();
   reader.onload = (event) => {
@@ -52,7 +81,7 @@ input_img_element.addEventListener("change", (e) => {
   reader.readAsDataURL(file);
 });
 
-function zoomInOnMouse(event) {
+function zoomInOnMouse(event, increment = 1) {
   // Get mouse offset.
   const width = canvas.width;
   const height = canvas.height;
@@ -61,7 +90,7 @@ function zoomInOnMouse(event) {
   const mousey = mousePosOnCanvas.y;
 
   // Normalize mouse wheel movement to +1 or -1 to avoid unusual jumps.
-  const wheel = event.deltaY < 0 ? 1 : -1;
+  const wheel = event.deltaY < 0 ? increment : -increment;
 
   // Compute zoom factor.
   const zoom = Math.exp(wheel * zoomIntensity);
@@ -88,6 +117,11 @@ function zoomInOnMouse(event) {
   visibleHeight = height / scale;
 
   // prevent canvas from zooming out too far
+  preventZoomOut(width, height);
+}
+
+function preventZoomOut(width, height) {
+  // prevent canvas from zooming out too far
   if (scale < 1) {
     context.setTransform(1, 0, 0, 1, 0, 0);
     scale = 1;
@@ -96,6 +130,26 @@ function zoomInOnMouse(event) {
     originx = 0;
     originy = 0;
   }
+}
+function zoomInOnMiddle(event, increment = 1) {
+  const width = canvas.width;
+  const height = canvas.height;
+  const mousex = canvas.width / 2;
+  const mousey = canvas.height / 2;
+  const wheel = event.deltaY < 0 ? increment : -increment;
+  const zoom = Math.exp(wheel * zoomIntensity);
+  context.translate(originx, originy);
+  originx -= mousex / (scale * zoom) - mousex / scale;
+  originy -= mousey / (scale * zoom) - mousey / scale;
+
+  context.scale(zoom, zoom);
+  context.translate(-originx, -originy);
+  scale *= zoom;
+  visibleWidth = width / scale;
+  visibleHeight = height / scale;
+
+  // prevent canvas from zooming out too far
+  preventZoomOut(width, height);
 }
 
 export { mousePosOnCanvas, scale };

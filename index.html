@@ -17,7 +17,6 @@
     <link rel="stylesheet" href="/style.css" />
 
     <!-- SCRIPTS -->
-    <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.js"></script>
     <script src="https://www.marvinj.org/releases/marvinj-0.9.js"></script>
     <script type="module" src="/script.js"></script>
   </head>
@@ -29,14 +28,35 @@
       <p>1000</p>
     </div>
     <div id="background">
-      <label id="input-image-label" for="input-image" class>Upload Image</label>
-      <input
-        id="input-image"
-        type="file"
-        src="#"
-        alt="missing image"
-        accept="image/*"
-      />
+      <div class="action-buttons">
+        <label id="input-image-label" for="input-image" class
+          >Upload Image</label
+        >
+        <input
+          id="input-image"
+          type="file"
+          src="#"
+          alt="missing image"
+          accept="image/*"
+        />
+        <div class="save-button-details">
+          <button type="button" class="save-image-button hidden">
+            Save Image
+          </button>
+          <label
+            for="alpha-background-checkbox"
+            id="alpha-background-checkbox-label"
+          >
+            <input
+              type="checkbox"
+              name="alpha-background-save"
+              id="alpha-background-checkbox"
+              checked
+            />
+            Transparent Background
+          </label>
+        </div>
+      </div>
       <section class="settings settings-collapsed">
         <div class="settings-header">
           <h2>Settings</h2>

@@ -17,6 +17,7 @@ import { mousePosOnCanvas, scale } from "./zoomInHandler.js";
 
 const input_img_element = document.getElementById("input-image");
 const input_img_label = document.getElementById("input-image-label");
+const saveImageButton = document.querySelector(".save-image-button");
 const canvas = document.getElementById("input-image-preview");
 const canvasContext = canvas.getContext("2d");
 const dotsAreaCanvas = document.getElementById("dots-area");
@@ -114,6 +115,22 @@ input_img_element.addEventListener("change", (e) => {
   });
 });
 
+saveImageButton.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  const hasBackground = !document.getElementById("alpha-background-checkbox")
+    .checked;
+  if (hasBackground) {
+    DrawDotsOnCanvas("black");
+  }
+
+  const link = document.createElement("a");
+  link.download = "image.png";
+  link.href = dotsAreaCanvas.toDataURL();
+  link.click();
+  link.remove();
+});
+
 minDotSizeSlider.addEventListener("input", (e) => {
   minDotRadius = parseFloat(minDotSizeSlider.dataset.value);
 });
@@ -171,6 +188,7 @@ debugCheckbox.addEventListener("change", (e) => {
 let canvasMousePosition = null;
 let draggingMouse = false;
 dotsAreaCanvas.addEventListener("mousedown", (e) => {
+  if (e.button === 1) return;
   draggingMouse = true;
 });
 dotsAreaCanvas.addEventListener("mousemove", (e) => {
@@ -218,6 +236,7 @@ function createReader(file, whenReady) {
       dotsAreaCanvas.style.aspectRatio = `${canvas.width} / ${canvas.height}`;
       dotsAreaCanvas.classList.add("dots-area-uploaded");
       input_img_label.classList.add("image-uploaded");
+      saveImageButton.classList.remove("hidden");
 
       canvasContext.drawImage(image, 0, 0);
 
@@ -301,17 +320,26 @@ async function moveDots() {
 moveDots();
 
 let drawIterator = 0;
-function DrawDotsOnCanvas() {
+function DrawDotsOnCanvas(backgroundColor = null) {
   // console.log(`time update ${performance.now() - lastTimeUpdate}`);
   // lastTimeUpdate = performance.now();
 
-  // clear canvas
-  dotsAreaCanvasContext.clearRect(
-    0,
-    0,
-    dotsAreaCanvas.width,
-    dotsAreaCanvas.height
-  );
+  if (backgroundColor) {
+    dotsAreaCanvasContext.fillStyle = backgroundColor;
+    dotsAreaCanvasContext.fillRect(
+      0,
+      0,
+      dotsAreaCanvas.width,
+      dotsAreaCanvas.height
+    );
+  } else {
+    dotsAreaCanvasContext.clearRect(
+      0,
+      0,
+      dotsAreaCanvas.width,
+      dotsAreaCanvas.height
+    );
+  }
 
   Object.entries(dotDictionary).forEach(([key, dot], i) => {
     DrawDot(dot);
@@ -360,13 +388,12 @@ function SetColorOfDot(dot) {
     green: 255,
     blue: 255,
   };
-  const apColor = getApproximatePixelColor(
-    positionPercent.x,
-    positionPercent.y,
-    uploadedImageData
-  );
   if (colored) {
-    colorToDraw = apColor;
+    colorToDraw = getApproximatePixelColor(
+      positionPercent.x,
+      positionPercent.y,
+      uploadedImageData
+    );
   }
   dot.desiredColor = {
     r: colorToDraw.red,
