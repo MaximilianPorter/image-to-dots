@@ -1,7 +1,7 @@
 const input_img_element = document.getElementById("input-image");
+const dotsAreaSection = document.querySelector(".dots-area-section");
 const canvas = document.getElementById("dots-area");
 const context = canvas.getContext("2d");
-let mousePos = { x: 0, y: 0 };
 let mousePosOnCanvas = { x: 0, y: 0 };
 
 const zoomIntensity = 0.2;

@@ -24,6 +24,12 @@ class Dot {
     };
     this.cellSize = cellSize;
 
+    this.colorChangeRate = 0.3;
+    this.desiredColor = {
+      r: 255,
+      g: 255,
+      b: 255,
+    };
     this.color = {
       r: 255,
       g: 255,
@@ -76,6 +82,16 @@ class Dot {
     } else {
       return false;
     }
+  }
+
+  updateColor() {
+    const rDiff = this.desiredColor.r - this.color.r;
+    const gDiff = this.desiredColor.g - this.color.g;
+    const bDiff = this.desiredColor.b - this.color.b;
+
+    this.color.r += rDiff * this.colorChangeRate;
+    this.color.g += gDiff * this.colorChangeRate;
+    this.color.b += bDiff * this.colorChangeRate;
   }
 }
 

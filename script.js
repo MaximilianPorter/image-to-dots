@@ -162,7 +162,7 @@ dotCountSlider.addEventListener("change", (e) => {
 });
 
 isColored_element.addEventListener("change", (e) => {
-  colored = e.target.checked;
+  colored = isColored_element.checked;
 });
 debugCheckbox.addEventListener("change", (e) => {
   isDrawingDebug = e.target.checked;
@@ -301,7 +301,7 @@ async function moveDots() {
 moveDots();
 
 let drawIterator = 0;
-async function DrawDotsOnCanvas() {
+function DrawDotsOnCanvas() {
   // console.log(`time update ${performance.now() - lastTimeUpdate}`);
   // lastTimeUpdate = performance.now();
 
@@ -326,38 +326,12 @@ DrawDotsOnCanvas();
 function DrawDot(dot) {
   UpdateGridPosition(dot);
   const { position, radius } = dot;
-  const positionPercent = {
-    x: position[0] / dotsAreaCanvas.width,
-    y: position[1] / dotsAreaCanvas.height,
-  };
 
-  let colorToDraw = {
-    red: 255,
-    green: 255,
-    blue: 255,
-  };
-  if (colored) {
-    const apColor = getApproximatePixelColor(
-      positionPercent.x,
-      positionPercent.y,
-      uploadedImageData
-    );
-    colorToDraw = apColor;
-  }
-
-  // const lerpedColor = {
-  //   r: dot.color.r + (colorToDraw.red - dot.color.r) * colorChangeRate,
-  //   g: dot.color.g + (colorToDraw.green - dot.color.g) * colorChangeRate,
-  //   b: dot.color.b + (colorToDraw.blue - dot.color.b) * colorChangeRate,
-  // };
-
-  dot.color = {
-    r: colorToDraw.red,
-    g: colorToDraw.green,
-    b: colorToDraw.blue,
-  };
+  SetColorOfDot(dot);
+  dot.updateColor();
 
   const colorString = `rgb(${dot.color.r}, ${dot.color.g}, ${dot.color.b})`;
+  // const colorString = dot.color;
 
   // draw first dot red
   const dotColor = dot.id === 0 && isDrawingDebug ? "red" : colorString;
@@ -373,6 +347,32 @@ function DrawDot(dot) {
   );
 
   if (dot.id === 0 && isDrawingDebug) DrawDebug(dot);
+}
+function SetColorOfDot(dot) {
+  const { position } = dot;
+  const positionPercent = {
+    x: position[0] / dotsAreaCanvas.width,
+    y: position[1] / dotsAreaCanvas.height,
+  };
+
+  let colorToDraw = {
+    red: 255,
+    green: 255,
+    blue: 255,
+  };
+  const apColor = getApproximatePixelColor(
+    positionPercent.x,
+    positionPercent.y,
+    uploadedImageData
+  );
+  if (colored) {
+    colorToDraw = apColor;
+  }
+  dot.desiredColor = {
+    r: colorToDraw.red,
+    g: colorToDraw.green,
+    b: colorToDraw.blue,
+  };
 }
 function DrawDebugGrid() {
   if (!isDrawingDebug) return;
@@ -508,14 +508,14 @@ function DrawDebug(dot) {
 
 function MoveDotToOtherEdge(dot) {
   if (dot.position[1] < 0) {
-    dot.position[1] = dotsAreaCanvas.height;
+    dot.position[1] = dotsAreaCanvas.height - 1;
   } else if (dot.position[1] > dotsAreaCanvas.height) {
-    dot.position[1] = 0;
+    dot.position[1] = 1;
   }
   if (dot.position[0] < 0) {
-    dot.position[0] = dotsAreaCanvas.width;
+    dot.position[0] = dotsAreaCanvas.width - 1;
   } else if (dot.position[0] > dotsAreaCanvas.width) {
-    dot.position[0] = 0;
+    dot.position[0] = 1;
   }
 }
 

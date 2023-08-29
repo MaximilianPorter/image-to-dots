@@ -107,6 +107,8 @@ body {
 
   max-height: 90vh;
   max-width: 90vw;
+  width: auto;
+  height: auto;
 
   margin: 0 auto;
 
@@ -142,7 +144,11 @@ body {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.8);
 }
-
+.dots-area-focused #dots-area {
+  width: 100vw;
+  max-width: none;
+  max-height: none;
+}
 .preview-images {
   display: grid;
   grid-template-columns: 1fr;
