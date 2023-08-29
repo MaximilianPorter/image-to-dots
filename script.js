@@ -21,6 +21,8 @@ const canvasContext = canvas.getContext("2d");
 const dotsAreaCanvas = document.getElementById("dots-area");
 const dotsAreaCanvasContext = dotsAreaCanvas.getContext("2d");
 
+const dotsAreaSection = document.querySelector(".dots-area-section");
+
 const minDotSizeSlider = document.getElementById("min-dot-size-slider");
 const maxDotSizeSlider = document.getElementById("max-dot-size-slider");
 
@@ -220,6 +222,21 @@ function createReader(file, whenReady) {
   };
   reader.readAsDataURL(file);
 }
+
+document.addEventListener("keydown", (e) => {
+  // key is f
+  if (e.keyCode === 70) {
+    dotsAreaSection.classList.add("dots-area-focused");
+    dotsAreaSection.requestFullscreen();
+  }
+});
+
+// on fullscreen exit
+document.addEventListener("fullscreenchange", (e) => {
+  if (!document.fullscreenElement) {
+    dotsAreaSection.classList.remove("dots-area-focused");
+  }
+});
 
 // DOT STUFF ------------------------------
 function addDots() {

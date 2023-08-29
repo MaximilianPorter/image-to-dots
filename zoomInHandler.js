@@ -1,3 +1,4 @@
+const input_img_element = document.getElementById("input-image");
 const canvas = document.getElementById("dots-area");
 const context = canvas.getContext("2d");
 let mousePos = { x: 0, y: 0 };
@@ -31,6 +32,24 @@ document.addEventListener("mousemove", (event) => {
 
 document.addEventListener("wheel", (event) => {
   zoomInOnMouse(event);
+});
+
+// check if canvas changed
+input_img_element.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const img = new Image();
+    img.onload = () => {
+      console.log("loaded");
+      // wait for canvas to update
+      setTimeout(() => {
+        zoomInOnMouse({ deltaY: 100 }); // zoom out a little bit to set scale
+      }, 100);
+    };
+    img.src = event.target.result;
+  };
+  reader.readAsDataURL(file);
 });
 
 function zoomInOnMouse(event) {
