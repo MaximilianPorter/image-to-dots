@@ -12,6 +12,7 @@ import {
 import * as valueSettings from "./settings.js";
 import * as dotBezier from "./dotSizeBezier.js";
 import "./settingsSection.js";
+import "./handleSliderBehaviour.js";
 
 const input_img_element = document.getElementById("input-image");
 const canvas = document.getElementById("input-image-preview");
@@ -26,8 +27,14 @@ const separationSlider = document.getElementById("separation-slider");
 const alignmentSlider = document.getElementById("alignment-slider");
 const centeringSlider = document.getElementById("centering-slider");
 
+const moveSpeedSlider = document.getElementById("move-speed-slider");
+const slowSpeedSlider = document.getElementById("slow-speed-slider");
+
 // settings elements
 const isColored_element = document.getElementById("IsColoredCheck");
+const debugCheckbox = document.getElementById("debug-checkbox");
+const gridSizeSlider = document.getElementById("grid-size-slider");
+const dotCountSlider = document.getElementById("dot-count-slider");
 
 let uploadedImageData;
 let grid = {};
@@ -37,10 +44,6 @@ const colorChangeRate = 0.2;
 
 let dotDictionary = {};
 const {
-  isDrawingDebug,
-  CELL_SIZE,
-  dotsToAdd,
-  dotSpeed,
   radiusChangeRate,
   collisionRadiusMultiplier,
   steeringStrength,
@@ -56,17 +59,30 @@ const {
 
 // stuff you can change with ui
 let {
+  isDrawingDebug,
+  CELL_SIZE,
+  dotsToAdd,
   colored,
+  dotSpeed,
   minDotRadius,
   maxDotRadius,
   centeringFactor,
   alignmentFactor,
   separationFactor,
+  slownessFactor,
 } = valueSettings.currentSettings;
 
-separationSlider.value = separationFactor * 100;
-alignmentSlider.value = alignmentFactor * 100;
-centeringSlider.value = centeringFactor * 100;
+debugCheckbox.checked = isDrawingDebug;
+
+separationSlider.dataset.value = separationFactor * 100;
+alignmentSlider.dataset.value = alignmentFactor * 100;
+centeringSlider.dataset.value = centeringFactor * 100;
+
+moveSpeedSlider.dataset.value = dotSpeed * 100;
+slowSpeedSlider.dataset.value = slownessFactor * 100;
+
+gridSizeSlider.dataset.value = CELL_SIZE;
+dotCountSlider.dataset.value = dotsToAdd;
 
 input_img_element.addEventListener("change", (e) => {
   if (e.target.files.length === 0) return;
@@ -94,23 +110,57 @@ input_img_element.addEventListener("change", (e) => {
 });
 
 minDotSizeSlider.addEventListener("input", (e) => {
-  minDotRadius = minDotSizeSlider.value / 1000;
+  minDotRadius = minDotSizeSlider.dataset.value / 1000;
 });
 maxDotSizeSlider.addEventListener("input", (e) => {
-  maxDotRadius = maxDotSizeSlider.value;
+  maxDotRadius = maxDotSizeSlider.dataset.value;
 });
 separationSlider.addEventListener("input", (e) => {
-  separationFactor = separationSlider.value / 100;
+  separationFactor = separationSlider.dataset.value / 100;
 });
 alignmentSlider.addEventListener("input", (e) => {
-  alignmentFactor = alignmentSlider.value / 100;
+  alignmentFactor = alignmentSlider.dataset.value / 100;
 });
 centeringSlider.addEventListener("input", (e) => {
-  centeringFactor = centeringSlider.value / 100;
+  centeringFactor = centeringSlider.dataset.value / 100;
+});
+moveSpeedSlider.addEventListener("input", (e) => {
+  dotSpeed = moveSpeedSlider.dataset.value / 100;
+  for (const [key, dot] of Object.entries(dotDictionary)) {
+    dot.startMoveSpeed = dotSpeed;
+    dot.moveSpeed = dotSpeed;
+  }
+});
+slowSpeedSlider.addEventListener("input", (e) => {
+  slownessFactor = slowSpeedSlider.dataset.value / 100;
+});
+gridSizeSlider.addEventListener("change", (e) => {
+  CELL_SIZE = parseInt(e.target.dataset.value);
+  ResetGrid();
+});
+
+dotCountSlider.addEventListener("change", (e) => {
+  dotsToAdd = parseInt(e.target.dataset.value);
+  if (Object.keys(dotDictionary).length <= 0) return;
+  if (dotsToAdd < Object.keys(dotDictionary).length) {
+    for (const [key, dot] of Object.entries(dotDictionary)) {
+      if (dot.id >= dotsToAdd) {
+        delete dotDictionary[key];
+      }
+    }
+  } else if (dotsToAdd > Object.keys(dotDictionary).length) {
+    for (let i = Object.keys(dotDictionary).length; i < dotsToAdd; i++) {
+      addDotAtRandomPos(i);
+    }
+  }
+  ResetGrid();
 });
 
 isColored_element.addEventListener("change", (e) => {
   colored = e.target.checked;
+});
+debugCheckbox.addEventListener("change", (e) => {
+  isDrawingDebug = e.target.checked;
 });
 
 let canvasMousePosition = null;
@@ -168,43 +218,51 @@ function createReader(file, whenReady) {
 }
 
 // DOT STUFF ------------------------------
-let sdfsdf = 0;
 function addDots() {
+  dotDictionary = {};
   grid = createGrid(dotsAreaCanvas.width, dotsAreaCanvas.height, CELL_SIZE);
   for (let i = 0; i < dotsToAdd; i++) {
-    const pos = [
-      help.Lerp(0.1, 0.9, Math.random()) * dotsAreaCanvas.width,
-      help.Lerp(0.1, 0.9, Math.random()) * dotsAreaCanvas.height,
-    ];
-
-    // random normalized move dir
-    const moveDirection = help.NormalizeVector([
-      Math.random() * 2 - 1,
-      Math.random() * 2 - 1,
-    ]);
-
-    const dotObject = new Dot(
-      i,
-      moveDirection,
-      dotSpeed,
-      pos,
-      minDotRadius,
-      debugDetectionRadius,
-      maxDotRadius / 2,
-      CELL_SIZE
-    );
-
-    const gridKey = `${dotObject.gridPosition.x},${dotObject.gridPosition.y}`;
-    grid[gridKey].push(dotObject);
-
-    dotDictionary[i] = dotObject;
+    addDotAtRandomPos(i);
   }
 }
 
-let lastTimeUpdate = performance.now();
+function addDotAtRandomPos(id) {
+  const spawnDistFromEdgeX = (maxDotRadius * 2) / dotsAreaCanvas.width;
+  const spawnDistFromEdgeY = (maxDotRadius * 2) / dotsAreaCanvas.height;
+  const pos = [
+    help.Lerp(spawnDistFromEdgeX, 1 - spawnDistFromEdgeX, Math.random()) *
+      dotsAreaCanvas.width,
+    help.Lerp(spawnDistFromEdgeY, 1 - spawnDistFromEdgeY, Math.random()) *
+      dotsAreaCanvas.height,
+  ];
+
+  // random normalized move dir
+  const moveDirection = help.NormalizeVector([
+    Math.random() * 2 - 1,
+    Math.random() * 2 - 1,
+  ]);
+
+  const dotObject = new Dot(
+    id,
+    moveDirection,
+    dotSpeed,
+    pos,
+    minDotRadius,
+    debugDetectionRadius,
+    maxDotRadius / 2,
+    CELL_SIZE
+  );
+
+  const gridKey = `${dotObject.gridPosition.x},${dotObject.gridPosition.y}`;
+  grid[gridKey].push(dotObject);
+
+  dotDictionary[id] = dotObject;
+
+  return dotObject;
+}
 
 // move dots every frame
-async function moveDots() {
+function moveDots() {
   if (Object.keys(dotDictionary).length === 0) return;
 
   for (const [key, dot] of Object.entries(dotDictionary)) {
@@ -218,7 +276,7 @@ async function moveDots() {
 moveDots();
 
 let drawIterator = 0;
-async function DrawDotsOnCanvas() {
+function DrawDotsOnCanvas() {
   // console.log(`time update ${performance.now() - lastTimeUpdate}`);
   // lastTimeUpdate = performance.now();
 
@@ -233,6 +291,7 @@ async function DrawDotsOnCanvas() {
   Object.entries(dotDictionary).forEach(([key, dot], i) => {
     DrawDot(dot);
   });
+  DrawDebugGrid();
 
   drawIterator++;
   setTimeout(DrawDotsOnCanvas, 1000 / 24); // 24 fps
@@ -285,6 +344,33 @@ function DrawDot(dot) {
   );
 
   if (dot.id === 0 && isDrawingDebug) DrawDebug(dot);
+}
+function DrawDebugGrid() {
+  if (!isDrawingDebug) return;
+  const cellSize = CELL_SIZE;
+  const color = "rgba(255, 255, 255, 0.2)";
+  for (let x = 0; x < dotsAreaCanvas.width; x += cellSize) {
+    help.drawLine(
+      dotsAreaCanvasContext,
+      x,
+      0,
+      x,
+      dotsAreaCanvas.height,
+      color,
+      3
+    );
+  }
+  for (let y = 0; y < dotsAreaCanvas.height; y += cellSize) {
+    help.drawLine(
+      dotsAreaCanvasContext,
+      0,
+      y,
+      dotsAreaCanvas.width,
+      y,
+      color,
+      3
+    );
+  }
 }
 function DrawDebug(dot) {
   if (!isDrawingDebug) return;
@@ -404,6 +490,15 @@ function MoveDotToOtherEdge(dot) {
   }
 }
 
+function ResetGrid() {
+  grid = createGrid(dotsAreaCanvas.width, dotsAreaCanvas.height, CELL_SIZE);
+  for (const [key, dot] of Object.entries(dotDictionary)) {
+    dot.cellSize = CELL_SIZE;
+    dot.gridPosition = { x: 0, y: 0 };
+    UpdateGridPosition(dot);
+  }
+}
+
 function UpdateGridPosition(dot) {
   const changedCell = dot.updateGridPosition();
   // if (dot.id === 0) console.log(dot.lastGridPosition);
@@ -414,12 +509,14 @@ function UpdateGridPosition(dot) {
     // remove dot from old grid position
     const oldGridKey = `${lastGridPosition.x},${lastGridPosition.y}`;
     const oldGrid = grid[oldGridKey];
-    const index = oldGrid.findIndex((dot) => dot.id === dot.id);
-    oldGrid.splice(index, 1);
+    if (oldGrid) {
+      const index = oldGrid.findIndex((dot) => dot.id === dot.id);
+      oldGrid.splice(index, 1);
+    }
 
     // add dot to new grid position
     const newGridKey = `${gridPosition.x},${gridPosition.y}`;
-    grid[newGridKey].push(dot);
+    grid[newGridKey]?.push(dot);
   }
 }
 
@@ -579,7 +676,8 @@ function SteerDirection(dot, otherDots) {
         dot.moveSpeed -
           decelleration *
             help.Lerp(0.5, 1, dot.radius / maxDotRadius) *
-            help.Lerp(1, 0, distance2 / (collisionRadius * collisionRadius)),
+            help.Lerp(1, 0, distance2 / (collisionRadius * collisionRadius)) *
+            help.Lerp(0, 2, slownessFactor),
         dotSpeed * minSpeedPercentage,
         dotSpeed
       );
@@ -613,23 +711,21 @@ function SteerDirection(dot, otherDots) {
   // steer away from mouse
   if (canvasMousePosition !== null) {
     const maxMouseDist = 200;
+    const minMouseDist = 150;
     const mouseVector = help.VectorDirection(dot.position, canvasMousePosition);
     const mouseDist2 = help.SquareVectorMagnitude(mouseVector);
+    const edgeBezier = help.BezierCurve(
+      [1, 1],
+      [1, 0],
+      [1, 0],
+      [0, 0],
+      (mouseDist2 - minMouseDist * minMouseDist) /
+        (maxMouseDist * maxMouseDist - minMouseDist * minMouseDist)
+    )[1];
     if (mouseDist2 < maxMouseDist * maxMouseDist) {
+      dot.moveSpeed += 3 * edgeBezier;
       direction = direction.map(
-        (dir, i) =>
-          dir -
-          mouseVector[i] *
-            steerFromMouseFactor *
-            help.Lerp(1, 0, mouseDist2 / (maxMouseDist * maxMouseDist))
-      );
-      dot.position = dot.position.map(
-        (pos, i) =>
-          pos -
-          mouseVector[i] *
-            steerFromMouseFactor *
-            0.005 *
-            help.Lerp(1, 0, mouseDist2 / (maxMouseDist * maxMouseDist))
+        (dir, i) => dir - mouseVector[i] * steerFromMouseFactor * edgeBezier
       );
     }
   }

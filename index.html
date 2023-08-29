@@ -41,7 +41,7 @@
         </div>
         <section class="settings-section">
           <div class="settings-section--title">
-            <h3>Color Settings</h3>
+            <h3>Basic Settings</h3>
             <ion-icon
               name="caret-forward-outline"
               class="settings-section-dropdown-button"
@@ -52,6 +52,36 @@
             >Colored
             <input type="checkbox" name="isColored" id="IsColoredCheck" />
           </label>
+          <label for="debug-checkbox" id="debug-checkbox-label"
+            >Debug
+            <input type="checkbox" name="isDebug" id="debug-checkbox" />
+          </label>
+          <div
+            class="slider"
+            data-min="2"
+            data-max="200"
+            data-value="20"
+            id="grid-size-slider"
+          >
+            <p class="slider--header">Grid Cell Size</p>
+            <div class="slider--background">
+              <div class="slider--fill"></div>
+              <div class="slider--handle"></div>
+            </div>
+          </div>
+          <div
+            class="slider"
+            data-min="1"
+            data-max="10000"
+            data-value="4000"
+            id="dot-count-slider"
+          >
+            <p class="slider--header">Dot Count</p>
+            <div class="slider--background">
+              <div class="slider--fill"></div>
+              <div class="slider--handle"></div>
+            </div>
+          </div>
         </section>
         <section class="settings-section">
           <div class="settings-section--title">
@@ -68,28 +98,32 @@
             <div class="bezier-point" name="p2"></div>
             <div class="bezier-point" name="p3"></div>
           </div>
-          <label for="min-dot-size-slider" class="slider-label">
-            Min Dot Size
-            <input
-              type="range"
-              min="1"
-              max="30000"
-              value="1"
-              class="slider--input"
-              id="min-dot-size-slider"
-            />
-          </label>
-          <label for="max-dot-size-slider" class="slider-label">
-            Max Dot Size
-            <input
-              type="range"
-              min="1"
-              max="40"
-              value="10"
-              class="slider--input"
-              id="max-dot-size-slider"
-            />
-          </label>
+          <div
+            class="slider"
+            data-min="1"
+            data-max="30000"
+            data-value="1"
+            id="min-dot-size-slider"
+          >
+            <p class="slider--header">Min Dot Size</p>
+            <div class="slider--background">
+              <div class="slider--fill"></div>
+              <div class="slider--handle"></div>
+            </div>
+          </div>
+          <div
+            class="slider"
+            data-min="1"
+            data-max="40"
+            data-value="10"
+            id="max-dot-size-slider"
+          >
+            <p class="slider--header">Max Dot Size</p>
+            <div class="slider--background">
+              <div class="slider--fill"></div>
+              <div class="slider--handle"></div>
+            </div>
+          </div>
         </section>
         <section class="settings-section">
           <div class="settings-section--title">
@@ -99,39 +133,80 @@
               class="settings-section-dropdown-button"
             ></ion-icon>
           </div>
-          <label for="separation-slider" class="slider-label">
-            Separation Factor
-            <input
-              type="range"
-              min="0"
-              max="200"
-              value="10"
-              class="slider--input"
-              id="separation-slider"
-            />
-          </label>
-          <label for="centering-slider" class="slider-label">
-            Centering Factor
-            <input
-              type="range"
-              min="0"
-              max="200"
-              value="10"
-              class="slider--input"
-              id="centering-slider"
-            />
-          </label>
-          <label for="alignment-slider" class="slider-label">
-            Alignment Factor
-            <input
-              type="range"
-              min="0"
-              max="200"
-              value="10"
-              class="slider--input"
-              id="alignment-slider"
-            />
-          </label>
+          <div
+            class="slider"
+            data-min="0"
+            data-max="200"
+            data-value="10"
+            id="separation-slider"
+          >
+            <p class="slider--header">Separation Factor</p>
+            <div class="slider--background">
+              <div class="slider--fill"></div>
+              <div class="slider--handle"></div>
+            </div>
+          </div>
+          <div
+            class="slider"
+            data-min="0"
+            data-max="200"
+            data-value="10"
+            id="centering-slider"
+          >
+            <p class="slider--header">Centering Factor</p>
+            <div class="slider--background">
+              <div class="slider--fill"></div>
+              <div class="slider--handle"></div>
+            </div>
+          </div>
+          <div
+            class="slider"
+            data-min="0"
+            data-max="200"
+            data-value="10"
+            id="alignment-slider"
+          >
+            <p class="slider--header">Alignment Factor</p>
+            <div class="slider--background">
+              <div class="slider--fill"></div>
+              <div class="slider--handle"></div>
+            </div>
+          </div>
+        </section>
+        <section class="settings-section">
+          <div class="settings-section--title">
+            <h3>Movement Settings</h3>
+            <ion-icon
+              name="caret-forward-outline"
+              class="settings-section-dropdown-button"
+            ></ion-icon>
+          </div>
+          <div
+            class="slider"
+            data-min="0"
+            data-max="500"
+            data-value="100"
+            id="move-speed-slider"
+          >
+            <p class="slider--header">Move Speed</p>
+            <div class="slider--background">
+              <div class="slider--fill"></div>
+              <div class="slider--handle"></div>
+            </div>
+          </div>
+          <div
+            class="slider"
+            data-min="0"
+            data-max="200"
+            data-value="100"
+            id="slow-speed-slider"
+          >
+            <p class="slider--header">Slowness Speed</p>
+            <div class="slider--background">
+              <div class="slider--fill"></div>
+              <div class="slider--handle"></div>
+            </div>
+          </div>
         </section>
       </section>
 

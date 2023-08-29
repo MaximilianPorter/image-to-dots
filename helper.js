@@ -24,6 +24,10 @@ function Lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
+function InverseLerp(a, b, value) {
+  return (value - a) / (b - a);
+}
+
 function DotProduct(vector1, vector2) {
   // Normalize the vectors
   const norm1 = NormalizeVector(vector1);
@@ -88,6 +92,7 @@ export {
   SquareVectorMagnitude,
   VectorDirection,
   Lerp,
+  InverseLerp,
   DotProduct,
   drawCircle,
   drawLine,

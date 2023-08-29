@@ -20,7 +20,8 @@ class Settings {
     alignmentFactor = 0.8,
     separationFactor = 0.1,
     turnTowardsLightFactor = 0.01,
-    steerFromMouseFactor = 5,
+    steerFromMouseFactor = 3,
+    slownessFactor = 1,
     visionDotProductThreshold = -0.5,
     slowDotProductThreshold = 0.5
   ) {
@@ -45,6 +46,7 @@ class Settings {
     this.separationFactor = separationFactor;
     this.turnTowardsLightFactor = turnTowardsLightFactor;
     this.steerFromMouseFactor = steerFromMouseFactor;
+    this.slownessFactor = slownessFactor;
     this.visionDotProductThreshold = visionDotProductThreshold;
     this.slowDotProductThreshold = slowDotProductThreshold;
   }
