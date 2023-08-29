@@ -21,6 +21,12 @@
     <script type="module" src="/script.js"></script>
   </head>
   <body>
+    <div id="settings-info-popup" class="hidden">
+      <p>whatever should go in here</p>
+    </div>
+    <div id="slider--handle-value" class="hidden">
+      <p>1000</p>
+    </div>
     <div id="background">
       <label id="input-image-label" for="input-image">Upload Image</label>
       <input
@@ -61,6 +67,9 @@
             data-min="2"
             data-max="200"
             data-value="20"
+            data-info="The size of the grid cells.
+            <br />
+            <em><sub>performance heavy</sub></em>"
             id="grid-size-slider"
           >
             <p class="slider--header">Grid Cell Size</p>
@@ -68,12 +77,19 @@
               <div class="slider--fill"></div>
               <div class="slider--handle"></div>
             </div>
+            <ion-icon
+              name="information-circle-outline"
+              class="info-button"
+            ></ion-icon>
           </div>
           <div
             class="slider"
             data-min="1"
             data-max="10000"
             data-value="4000"
+            data-info="The amount of dots in the image.
+            <br />
+            <em><sub>performance heavy</sub></em>"
             id="dot-count-slider"
           >
             <p class="slider--header">Dot Count</p>
@@ -81,6 +97,10 @@
               <div class="slider--fill"></div>
               <div class="slider--handle"></div>
             </div>
+            <ion-icon
+              name="information-circle-outline"
+              class="info-button"
+            ></ion-icon>
           </div>
         </section>
         <section class="settings-section">
@@ -100,9 +120,10 @@
           </div>
           <div
             class="slider"
-            data-min="1"
-            data-max="30000"
-            data-value="1"
+            data-min=".001"
+            data-max="30"
+            data-value=".001"
+            data-info="Size of the smallest dot."
             id="min-dot-size-slider"
           >
             <p class="slider--header">Min Dot Size</p>
@@ -110,12 +131,17 @@
               <div class="slider--fill"></div>
               <div class="slider--handle"></div>
             </div>
+            <ion-icon
+              name="information-circle-outline"
+              class="info-button"
+            ></ion-icon>
           </div>
           <div
             class="slider"
             data-min="1"
             data-max="40"
             data-value="10"
+            data-info="Size of the biggest dot."
             id="max-dot-size-slider"
           >
             <p class="slider--header">Max Dot Size</p>
@@ -123,6 +149,10 @@
               <div class="slider--fill"></div>
               <div class="slider--handle"></div>
             </div>
+            <ion-icon
+              name="information-circle-outline"
+              class="info-button"
+            ></ion-icon>
           </div>
         </section>
         <section class="settings-section">
@@ -136,8 +166,9 @@
           <div
             class="slider"
             data-min="0"
-            data-max="200"
-            data-value="10"
+            data-max="2"
+            data-value=".1"
+            data-info="The strength of the separation force from other dots."
             id="separation-slider"
           >
             <p class="slider--header">Separation Factor</p>
@@ -145,12 +176,17 @@
               <div class="slider--fill"></div>
               <div class="slider--handle"></div>
             </div>
+            <ion-icon
+              name="information-circle-outline"
+              class="info-button"
+            ></ion-icon>
           </div>
           <div
             class="slider"
             data-min="0"
-            data-max="200"
-            data-value="10"
+            data-max="2"
+            data-value=".1"
+            data-info="The attraction strength to the average center of all the dots around a certain dot."
             id="centering-slider"
           >
             <p class="slider--header">Centering Factor</p>
@@ -158,12 +194,17 @@
               <div class="slider--fill"></div>
               <div class="slider--handle"></div>
             </div>
+            <ion-icon
+              name="information-circle-outline"
+              class="info-button"
+            ></ion-icon>
           </div>
           <div
             class="slider"
             data-min="0"
-            data-max="200"
-            data-value="10"
+            data-max="2"
+            data-value=".1"
+            data-info="The strength of how dots will copy the movement direction of nearby dots."
             id="alignment-slider"
           >
             <p class="slider--header">Alignment Factor</p>
@@ -171,6 +212,10 @@
               <div class="slider--fill"></div>
               <div class="slider--handle"></div>
             </div>
+            <ion-icon
+              name="information-circle-outline"
+              class="info-button"
+            ></ion-icon>
           </div>
         </section>
         <section class="settings-section">
@@ -183,9 +228,10 @@
           </div>
           <div
             class="slider"
-            data-min="0"
-            data-max="500"
-            data-value="100"
+            data-min=".1"
+            data-max="5"
+            data-value="1"
+            data-info="The maximum speed a dot can move at."
             id="move-speed-slider"
           >
             <p class="slider--header">Move Speed</p>
@@ -193,19 +239,28 @@
               <div class="slider--fill"></div>
               <div class="slider--handle"></div>
             </div>
+            <ion-icon
+              name="information-circle-outline"
+              class="info-button"
+            ></ion-icon>
           </div>
           <div
             class="slider"
             data-min="0"
-            data-max="200"
-            data-value="100"
+            data-max="2"
+            data-value="1"
+            data-info="The amount of decelleration that will be applied when a dot is too close to the front of another dot."
             id="slow-speed-slider"
           >
-            <p class="slider--header">Slowness Speed</p>
+            <p class="slider--header">Decelleration Factor</p>
             <div class="slider--background">
               <div class="slider--fill"></div>
               <div class="slider--handle"></div>
             </div>
+            <ion-icon
+              name="information-circle-outline"
+              class="info-button"
+            ></ion-icon>
           </div>
         </section>
       </section>

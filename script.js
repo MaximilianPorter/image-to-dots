@@ -77,12 +77,12 @@ let {
 
 debugCheckbox.checked = isDrawingDebug;
 
-separationSlider.dataset.value = separationFactor * 100;
-alignmentSlider.dataset.value = alignmentFactor * 100;
-centeringSlider.dataset.value = centeringFactor * 100;
+separationSlider.dataset.value = separationFactor;
+alignmentSlider.dataset.value = alignmentFactor;
+centeringSlider.dataset.value = centeringFactor;
 
-moveSpeedSlider.dataset.value = dotSpeed * 100;
-slowSpeedSlider.dataset.value = slownessFactor * 100;
+moveSpeedSlider.dataset.value = dotSpeed;
+slowSpeedSlider.dataset.value = slownessFactor;
 
 gridSizeSlider.dataset.value = CELL_SIZE;
 dotCountSlider.dataset.value = dotsToAdd;
@@ -113,29 +113,29 @@ input_img_element.addEventListener("change", (e) => {
 });
 
 minDotSizeSlider.addEventListener("input", (e) => {
-  minDotRadius = minDotSizeSlider.dataset.value / 1000;
+  minDotRadius = parseFloat(minDotSizeSlider.dataset.value);
 });
 maxDotSizeSlider.addEventListener("input", (e) => {
-  maxDotRadius = maxDotSizeSlider.dataset.value;
+  maxDotRadius = parseFloat(maxDotSizeSlider.dataset.value);
 });
 separationSlider.addEventListener("input", (e) => {
-  separationFactor = separationSlider.dataset.value / 100;
+  separationFactor = parseFloat(separationSlider.dataset.value);
 });
 alignmentSlider.addEventListener("input", (e) => {
-  alignmentFactor = alignmentSlider.dataset.value / 100;
+  alignmentFactor = parseFloat(alignmentSlider.dataset.value);
 });
 centeringSlider.addEventListener("input", (e) => {
-  centeringFactor = centeringSlider.dataset.value / 100;
+  centeringFactor = parseFloat(centeringSlider.dataset.value);
 });
 moveSpeedSlider.addEventListener("input", (e) => {
-  dotSpeed = moveSpeedSlider.dataset.value / 100;
+  dotSpeed = parseFloat(moveSpeedSlider.dataset.value);
   for (const [key, dot] of Object.entries(dotDictionary)) {
     dot.startMoveSpeed = dotSpeed;
     dot.moveSpeed = dotSpeed;
   }
 });
 slowSpeedSlider.addEventListener("input", (e) => {
-  slownessFactor = slowSpeedSlider.dataset.value / 100;
+  slownessFactor = slowSpeedSlider.dataset.value;
 });
 gridSizeSlider.addEventListener("change", (e) => {
   CELL_SIZE = parseInt(e.target.dataset.value);
