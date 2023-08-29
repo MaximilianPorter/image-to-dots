@@ -13,6 +13,7 @@ import * as valueSettings from "./settings.js";
 import * as dotBezier from "./dotSizeBezier.js";
 import "./settingsSection.js";
 import "./handleSliderBehaviour.js";
+import { mousePosOnCanvas, scale } from "./zoomInHandler.js";
 
 const input_img_element = document.getElementById("input-image");
 const canvas = document.getElementById("input-image-preview");
@@ -170,17 +171,19 @@ dotsAreaCanvas.addEventListener("mousedown", (e) => {
 });
 dotsAreaCanvas.addEventListener("mousemove", (e) => {
   if (!draggingMouse) return;
-  const rect = dotsAreaCanvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  const percent = {
-    x: x / rect.width,
-    y: y / rect.height,
-  };
-  canvasMousePosition = [
-    percent.x * dotsAreaCanvas.width,
-    percent.y * dotsAreaCanvas.height,
-  ];
+  // const rect = dotsAreaCanvas.getBoundingClientRect();
+  // const x = e.clientX - rect.left;
+  // const y = e.clientY - rect.top;
+  // const percent = {
+  //   x: x / rect.width,
+  //   y: y / rect.height,
+  // };
+  // canvasMousePosition = [
+  //   percent.x * dotsAreaCanvas.width,
+  //   percent.y * dotsAreaCanvas.height,
+  // ];
+  canvasMousePosition = [mousePosOnCanvas.x, mousePosOnCanvas.y];
+  // console.log(canvasMousePosition);
   help.drawCircle(
     dotsAreaCanvasContext,
     canvasMousePosition.x,
@@ -207,6 +210,7 @@ function createReader(file, whenReady) {
       // match aspect ratio of canvas
       dotsAreaCanvas.width = 1518;
       dotsAreaCanvas.height = (1518 / canvas.width) * canvas.height;
+      dotsAreaCanvas.style.aspectRatio = `${canvas.width} / ${canvas.height}`;
 
       canvasContext.drawImage(image, 0, 0);
 
@@ -713,8 +717,8 @@ function SteerDirection(dot, otherDots) {
 
   // steer away from mouse
   if (canvasMousePosition !== null) {
-    const maxMouseDist = 200;
-    const minMouseDist = 150;
+    const maxMouseDist = 200 / scale;
+    const minMouseDist = 150 / scale;
     const mouseVector = help.VectorDirection(dot.position, canvasMousePosition);
     const mouseDist2 = help.SquareVectorMagnitude(mouseVector);
     const edgeBezier = help.BezierCurve(
