@@ -86,6 +86,10 @@ function UpdateVisualsToMatchValue(slider) {
   const rect = background.getBoundingClientRect();
   const minRect = handle.getBoundingClientRect().width / 2;
   const maxRect = rect.width - minRect;
+  const valueType = slider.dataset.valueType;
+  if (valueType === "int") {
+    slider.dataset.value = Math.round(slider.dataset.value);
+  }
   const value = parseFloat(slider.dataset.value);
   const percentage = help.Clamp(help.InverseLerp(min, max, value), 0, 1);
 
@@ -115,8 +119,15 @@ function ShowSliderValue(show, slider = null) {
   // sliderHandleValue.style.top = `${(position.top + position.bottom) / 2}px`;
   // sliderHandleValue.style.left = `${position.right}px`;
 
+  const valueType = slider.dataset.valueType;
+  if (valueType === "int") {
+    slider.dataset.value = Math.round(slider.dataset.value);
+  }
   const sliderValue = parseFloat(slider.dataset.value);
-  const fixedPlace = sliderValue < 0.01 ? 3 : 2;
+  let fixedPlace = sliderValue < 0.01 ? 3 : 2;
+  if (valueType === "int") {
+    fixedPlace = 0;
+  }
   sliderHandleValue.querySelector("p").innerHTML = parseFloat(
     slider.dataset.value
   ).toFixed(fixedPlace);

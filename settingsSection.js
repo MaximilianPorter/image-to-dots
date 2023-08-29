@@ -4,7 +4,7 @@ const settingsMenu = document.querySelector(".settings");
 const infoButtons = document.querySelectorAll(".info-button");
 const settingsInfoPopup = document.getElementById("settings-info-popup");
 
-const debugExpanded = true;
+const debugExpanded = false;
 if (debugExpanded) settingsMenu.classList.remove("settings-collapsed");
 
 settingsIcon.addEventListener("click", (e) => {

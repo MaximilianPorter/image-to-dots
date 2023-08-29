@@ -66,12 +66,11 @@ body {
   font-family: inherit;
   font-size: inherit;
   font-weight: 700;
-  margin: 0 auto;
   width: max-content;
   background-color: var(--color1);
   border-radius: 5px;
 
-  margin: 1rem auto;
+  margin: 50vh auto;
 
   padding: 1rem;
 
@@ -80,6 +79,9 @@ body {
 }
 #input-image-label:hover {
   background-color: var(--color1_light);
+}
+.image-uploaded {
+  margin: 1rem auto !important;
 }
 #input-image {
   display: none;
@@ -98,6 +100,7 @@ body {
 
 #dots-area {
   display: block;
+  pointer-events: none;
   background-color: black;
 
   max-height: 90vh;
@@ -114,8 +117,16 @@ body {
   margin-top: 5rem;
   z-index: 2;
 
+  opacity: 0;
+
   /* cool blue filter */
   /* filter: sepia(100%) hue-rotate(180deg) saturate(1000%) brightness(100%); */
+
+  transition: all 0.5s cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+.dots-area-uploaded {
+  opacity: 1 !important;
+  pointer-events: all !important;
 }
 .dots-area-focused canvas {
   margin-top: 0 !important;

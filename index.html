@@ -28,7 +28,7 @@
       <p>1000</p>
     </div>
     <div id="background">
-      <label id="input-image-label" for="input-image">Upload Image</label>
+      <label id="input-image-label" for="input-image" class>Upload Image</label>
       <input
         id="input-image"
         type="file"
@@ -64,6 +64,7 @@
           </label>
           <div
             class="slider"
+            data-value-type="int"
             data-min="2"
             data-max="200"
             data-value="20"
@@ -84,6 +85,7 @@
           </div>
           <div
             class="slider"
+            data-value-type="int"
             data-min="1"
             data-max="10000"
             data-value="4000"
@@ -120,6 +122,7 @@
           </div>
           <div
             class="slider"
+            data-value-type="float"
             data-min=".001"
             data-max="30"
             data-value=".001"
@@ -138,6 +141,7 @@
           </div>
           <div
             class="slider"
+            data-value-type="float"
             data-min="1"
             data-max="40"
             data-value="10"
@@ -165,6 +169,7 @@
           </div>
           <div
             class="slider"
+            data-value-type="float"
             data-min="0"
             data-max="2"
             data-value=".1"
@@ -183,6 +188,7 @@
           </div>
           <div
             class="slider"
+            data-value-type="float"
             data-min="0"
             data-max="2"
             data-value=".1"
@@ -201,6 +207,7 @@
           </div>
           <div
             class="slider"
+            data-value-type="float"
             data-min="0"
             data-max="2"
             data-value=".1"
@@ -228,10 +235,11 @@
           </div>
           <div
             class="slider"
+            data-value-type="float"
             data-min=".1"
             data-max="5"
             data-value="1"
-            data-info="The maximum speed a dot can move at."
+            data-info="The maximum speed that dots can move."
             id="move-speed-slider"
           >
             <p class="slider--header">Move Speed</p>
@@ -246,10 +254,11 @@
           </div>
           <div
             class="slider"
+            data-value-type="float"
             data-min="0"
             data-max="2"
             data-value="1"
-            data-info="The amount of decelleration that will be applied when a dot is too close to the front of another dot."
+            data-info="The amount of decelleration that will be applied when a dot is too close to the dot in front of it."
             id="slow-speed-slider"
           >
             <p class="slider--header">Decelleration Factor</p>
@@ -267,8 +276,8 @@
 
       <div class="preview-images">
         <canvas id="input-image-preview" class=""></canvas>
-        <div class="dots-area-section dots-area-focused">
-          <canvas id="dots-area"></canvas>
+        <div class="dots-area-section">
+          <canvas id="dots-area" class=""></canvas>
         </div>
       </div>
     </div>

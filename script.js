@@ -16,6 +16,7 @@ import "./handleSliderBehaviour.js";
 import { mousePosOnCanvas, scale } from "./zoomInHandler.js";
 
 const input_img_element = document.getElementById("input-image");
+const input_img_label = document.getElementById("input-image-label");
 const canvas = document.getElementById("input-image-preview");
 const canvasContext = canvas.getContext("2d");
 const dotsAreaCanvas = document.getElementById("dots-area");
@@ -213,6 +214,8 @@ function createReader(file, whenReady) {
       dotsAreaCanvas.width = 1518;
       dotsAreaCanvas.height = (1518 / canvas.width) * canvas.height;
       dotsAreaCanvas.style.aspectRatio = `${canvas.width} / ${canvas.height}`;
+      dotsAreaCanvas.classList.add("dots-area-uploaded");
+      input_img_label.classList.add("image-uploaded");
 
       canvasContext.drawImage(image, 0, 0);
 
