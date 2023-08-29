@@ -219,7 +219,6 @@ function createReader(file, whenReady) {
 
 // DOT STUFF ------------------------------
 function addDots() {
-  dotDictionary = {};
   grid = createGrid(dotsAreaCanvas.width, dotsAreaCanvas.height, CELL_SIZE);
   for (let i = 0; i < dotsToAdd; i++) {
     addDotAtRandomPos(i);
@@ -227,12 +226,12 @@ function addDots() {
 }
 
 function addDotAtRandomPos(id) {
-  const spawnDistFromEdgeX = (maxDotRadius * 2) / dotsAreaCanvas.width;
-  const spawnDistFromEdgeY = (maxDotRadius * 2) / dotsAreaCanvas.height;
+  const spawnPercentFromEdgeX = 0.1;
+  const spawnPercentFromEdgeY = 0.1;
   const pos = [
-    help.Lerp(spawnDistFromEdgeX, 1 - spawnDistFromEdgeX, Math.random()) *
+    help.Lerp(spawnPercentFromEdgeX, 1 - spawnPercentFromEdgeX, Math.random()) *
       dotsAreaCanvas.width,
-    help.Lerp(spawnDistFromEdgeY, 1 - spawnDistFromEdgeY, Math.random()) *
+    help.Lerp(spawnPercentFromEdgeY, 1 - spawnPercentFromEdgeY, Math.random()) *
       dotsAreaCanvas.height,
   ];
 
@@ -262,7 +261,7 @@ function addDotAtRandomPos(id) {
 }
 
 // move dots every frame
-function moveDots() {
+async function moveDots() {
   if (Object.keys(dotDictionary).length === 0) return;
 
   for (const [key, dot] of Object.entries(dotDictionary)) {
@@ -276,7 +275,7 @@ function moveDots() {
 moveDots();
 
 let drawIterator = 0;
-function DrawDotsOnCanvas() {
+async function DrawDotsOnCanvas() {
   // console.log(`time update ${performance.now() - lastTimeUpdate}`);
   // lastTimeUpdate = performance.now();
 
@@ -320,13 +319,17 @@ function DrawDot(dot) {
     colorToDraw = apColor;
   }
 
-  const lerpedColor = {
-    r: dot.color.r + (colorToDraw.red - dot.color.r) * colorChangeRate,
-    g: dot.color.g + (colorToDraw.green - dot.color.g) * colorChangeRate,
-    b: dot.color.b + (colorToDraw.blue - dot.color.b) * colorChangeRate,
-  };
+  // const lerpedColor = {
+  //   r: dot.color.r + (colorToDraw.red - dot.color.r) * colorChangeRate,
+  //   g: dot.color.g + (colorToDraw.green - dot.color.g) * colorChangeRate,
+  //   b: dot.color.b + (colorToDraw.blue - dot.color.b) * colorChangeRate,
+  // };
 
-  dot.color = lerpedColor;
+  dot.color = {
+    r: colorToDraw.red,
+    g: colorToDraw.green,
+    b: colorToDraw.blue,
+  };
 
   const colorString = `rgb(${dot.color.r}, ${dot.color.g}, ${dot.color.b})`;
 
