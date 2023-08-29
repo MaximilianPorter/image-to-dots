@@ -24,6 +24,7 @@ const dotsAreaCanvasContext = dotsAreaCanvas.getContext("2d");
 
 const dotsAreaSection = document.querySelector(".dots-area-section");
 
+const fpsSlider = document.getElementById("fps-slider");
 const minDotSizeSlider = document.getElementById("min-dot-size-slider");
 const maxDotSizeSlider = document.getElementById("max-dot-size-slider");
 
@@ -211,8 +212,9 @@ function createReader(file, whenReady) {
       canvas.height = image.height;
 
       // match aspect ratio of canvas
-      dotsAreaCanvas.width = 1518;
-      dotsAreaCanvas.height = (1518 / canvas.width) * canvas.height;
+      const setCanvasWidth = 1518;
+      dotsAreaCanvas.width = setCanvasWidth;
+      dotsAreaCanvas.height = (setCanvasWidth / canvas.width) * canvas.height;
       dotsAreaCanvas.style.aspectRatio = `${canvas.width} / ${canvas.height}`;
       dotsAreaCanvas.classList.add("dots-area-uploaded");
       input_img_label.classList.add("image-uploaded");
@@ -317,7 +319,7 @@ async function DrawDotsOnCanvas() {
   DrawDebugGrid();
 
   drawIterator++;
-  setTimeout(DrawDotsOnCanvas, 1000 / 24); // 24 fps
+  setTimeout(DrawDotsOnCanvas, 1000 / parseInt(fpsSlider.dataset.value)); // 24 fps
 }
 DrawDotsOnCanvas();
 

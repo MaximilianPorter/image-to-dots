@@ -65,6 +65,28 @@
           <div
             class="slider"
             data-value-type="int"
+            data-min="1"
+            data-max="60"
+            data-value="24"
+            data-info="Maximum frames-per-second of the canvas draw calls.
+            <br />
+            <br />
+            <em><sub>I have this here because I don't want to kill your computer, but if you can run it faster, go ahead.</sub></em>"
+            id="fps-slider"
+          >
+            <p class="slider--header">FPS</p>
+            <div class="slider--background">
+              <div class="slider--fill"></div>
+              <div class="slider--handle"></div>
+            </div>
+            <ion-icon
+              name="information-circle-outline"
+              class="info-button"
+            ></ion-icon>
+          </div>
+          <div
+            class="slider"
+            data-value-type="int"
             data-min="2"
             data-max="200"
             data-value="20"
