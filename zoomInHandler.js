@@ -58,7 +58,7 @@ document.addEventListener("mousemove", (event) => {
   // context.fill();
 });
 
-document.addEventListener("wheel", (event) => {
+canvas.addEventListener("wheel", (event) => {
   zoomInOnMouse(event);
 });
 

@@ -230,6 +230,18 @@ document.addEventListener("mouseup", (e) => {
   canvasMousePosition = null;
 });
 
+let lastTimeUpdate = performance.now();
+function measureApproximateFPS() {
+  const now = performance.now();
+  const delta = now - lastTimeUpdate;
+  lastTimeUpdate = now;
+  const fps = 1000 / delta;
+  console.log(`fps: ${fps}`);
+
+  requestAnimationFrame(measureApproximateFPS);
+}
+// measureApproximateFPS();
+
 function createReader(file, whenReady) {
   const reader = new FileReader();
   reader.onload = function (evt) {
@@ -306,6 +318,8 @@ function addDotAtRandomPos(id) {
     CELL_SIZE
   );
 
+  dotObject.moveDotFunction = moveDot.bind(null, dotObject);
+
   const gridKey = `${dotObject.gridPosition.x},${dotObject.gridPosition.y}`;
   grid[gridKey].push(dotObject);
 
@@ -315,20 +329,22 @@ function addDotAtRandomPos(id) {
 }
 
 // move dots every frame
-async function moveDots() {
+function moveDots() {
   if (Object.keys(dotDictionary).length === 0) return;
 
-  for (const [key, dot] of Object.entries(dotDictionary)) {
-    dot.updatePosition();
+  Object.values(dotDictionary).forEach((dot) => moveDot(dot));
 
-    UpdateDotRadius(dot);
-    HandleDotCollision(dot);
-  }
-  requestAnimationFrame(moveDots);
+  setTimeout(moveDots, 1000 / 60); // flat 60 fps
 }
 moveDots();
 
-let drawIterator = 0;
+function moveDot(dot) {
+  // console.log(dot.id);
+  dot.updatePosition();
+  UpdateDotRadius(dot);
+  HandleDotCollision(dot);
+}
+
 function DrawDotsOnCanvas(backgroundColor = null) {
   // console.log(`time update ${performance.now() - lastTimeUpdate}`);
   // lastTimeUpdate = performance.now();
@@ -353,12 +369,12 @@ function DrawDotsOnCanvas(backgroundColor = null) {
   const dotsSortedByRadius = Object.values(dotDictionary).sort(
     (a, b) => a.radius - b.radius
   );
-  dotsSortedByRadius.forEach((dot) => {
-    DrawDot(dot);
-  });
+
+  // run draw dot on each dot in a promise
+  dotsSortedByRadius.forEach((dot) => DrawDot(dot));
+
   DrawDebugGrid();
 
-  drawIterator++;
   setTimeout(DrawDotsOnCanvas, 1000 / parseInt(fpsSlider.dataset.value)); // 24 fps
 }
 DrawDotsOnCanvas();
