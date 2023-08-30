@@ -391,8 +391,8 @@ function DrawDot(dot) {
 function SetColorOfDot(dot) {
   const { position } = dot;
   const positionPercent = {
-    x: position[0] / dotsAreaCanvas.width,
-    y: position[1] / dotsAreaCanvas.height,
+    x: help.Clamp(position[0] / dotsAreaCanvas.width, 0.0001, 0.9999),
+    y: help.Clamp(position[1] / dotsAreaCanvas.height, 0.0001, 0.9999),
   };
 
   let colorToDraw = {
@@ -546,15 +546,15 @@ function DrawDebug(dot) {
 }
 
 function MoveDotToOtherEdge(dot) {
-  if (dot.position[1] < 0) {
-    dot.position[1] = dotsAreaCanvas.height - 1;
-  } else if (dot.position[1] > dotsAreaCanvas.height) {
-    dot.position[1] = 1;
+  if (dot.position[1] < 0 - dot.radius) {
+    dot.position[1] = dotsAreaCanvas.height + dot.radius;
+  } else if (dot.position[1] > dotsAreaCanvas.height + dot.radius) {
+    dot.position[1] = 0 - dot.radius;
   }
-  if (dot.position[0] < 0) {
-    dot.position[0] = dotsAreaCanvas.width - 1;
-  } else if (dot.position[0] > dotsAreaCanvas.width) {
-    dot.position[0] = 1;
+  if (dot.position[0] < 0 - dot.radius) {
+    dot.position[0] = dotsAreaCanvas.width + dot.radius;
+  } else if (dot.position[0] > dotsAreaCanvas.width + dot.radius) {
+    dot.position[0] = 0 - dot.radius;
   }
 }
 
@@ -654,8 +654,8 @@ function getNeighboringCells(gridPosition) {
 function UpdateDotRadius(dot) {
   const { position, radius } = dot;
   const positionPercent = {
-    x: position[0] / dotsAreaCanvas.width,
-    y: position[1] / dotsAreaCanvas.height,
+    x: help.Clamp(position[0] / dotsAreaCanvas.width, 0.0001, 0.9999),
+    y: help.Clamp(position[1] / dotsAreaCanvas.height, 0.0001, 0.9999),
   };
   const pixelValue = getPixelValue(
     positionPercent.x,
