@@ -24,7 +24,7 @@ class Dot {
     };
     this.cellSize = cellSize;
 
-    this.colorChangeRate = 0.3;
+    this.colorChangeRate = 0.1;
     this.desiredColor = {
       r: 255,
       g: 255,

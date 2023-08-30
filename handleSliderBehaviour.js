@@ -100,7 +100,6 @@ function UpdateVisualsToMatchValue(slider) {
   }%`;
 
   slider.dispatchEvent(new Event("change", { bubbles: true }));
-  console.log("change");
 }
 
 function ShowSliderValue(show, slider = null) {

@@ -39,10 +39,8 @@
           alt="missing image"
           accept="image/*"
         />
-        <div class="save-button-details">
-          <button type="button" class="save-image-button hidden">
-            Save Image
-          </button>
+        <div class="save-button-details hidden">
+          <button type="button" class="save-image-button">Save Image</button>
           <label
             for="alpha-background-checkbox"
             id="alpha-background-checkbox-label"
@@ -87,8 +85,8 @@
             class="slider"
             data-value-type="int"
             data-min="1"
-            data-max="60"
-            data-value="24"
+            data-max="144"
+            data-value="60"
             data-info="Maximum frames-per-second of the canvas draw calls.
             <br />
             <br />
@@ -113,7 +111,11 @@
             data-value="20"
             data-info="The size of the grid cells.
             <br />
-            <em><sub>performance heavy</sub></em>"
+            <em><sub>performance heavy</sub></em>
+            <br />
+            smaller = better performace, but less accurate.
+            <br />
+            bigger = worse performance, but more accurate."
             id="grid-size-slider"
           >
             <p class="slider--header">Grid Cell Size</p>
@@ -192,6 +194,27 @@
             id="max-dot-size-slider"
           >
             <p class="slider--header">Max Dot Size</p>
+            <div class="slider--background">
+              <div class="slider--fill"></div>
+              <div class="slider--handle"></div>
+            </div>
+            <ion-icon
+              name="information-circle-outline"
+              class="info-button"
+            ></ion-icon>
+          </div>
+          <div
+            class="slider"
+            data-value-type="float"
+            data-min="0.01"
+            data-max="1"
+            data-value=".1"
+            data-info="How quickly the dot size changes when updating it's radius.
+            <br /><br />
+            I added this because when it's lower and the dot size is high, it makes transitions more relaxing."
+            id="radius-change-slider"
+          >
+            <p class="slider--header">Radius Change Rate</p>
             <div class="slider--background">
               <div class="slider--fill"></div>
               <div class="slider--handle"></div>

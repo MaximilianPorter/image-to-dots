@@ -18,6 +18,7 @@ import { mousePosOnCanvas, scale } from "./zoomInHandler.js";
 const input_img_element = document.getElementById("input-image");
 const input_img_label = document.getElementById("input-image-label");
 const saveImageButton = document.querySelector(".save-image-button");
+const saveButtonDetailsArea = document.querySelector(".save-button-details");
 const canvas = document.getElementById("input-image-preview");
 const canvasContext = canvas.getContext("2d");
 const dotsAreaCanvas = document.getElementById("dots-area");
@@ -28,6 +29,7 @@ const dotsAreaSection = document.querySelector(".dots-area-section");
 const fpsSlider = document.getElementById("fps-slider");
 const minDotSizeSlider = document.getElementById("min-dot-size-slider");
 const maxDotSizeSlider = document.getElementById("max-dot-size-slider");
+const radiusChangeSlider = document.getElementById("radius-change-slider");
 
 const separationSlider = document.getElementById("separation-slider");
 const alignmentSlider = document.getElementById("alignment-slider");
@@ -50,7 +52,6 @@ const colorChangeRate = 0.2;
 
 let dotDictionary = {};
 const {
-  radiusChangeRate,
   collisionRadiusMultiplier,
   steeringStrength,
   decelleration,
@@ -72,6 +73,7 @@ let {
   dotSpeed,
   minDotRadius,
   maxDotRadius,
+  radiusChangeRate,
   centeringFactor,
   alignmentFactor,
   separationFactor,
@@ -83,6 +85,10 @@ debugCheckbox.checked = isDrawingDebug;
 separationSlider.dataset.value = separationFactor;
 alignmentSlider.dataset.value = alignmentFactor;
 centeringSlider.dataset.value = centeringFactor;
+
+minDotSizeSlider.dataset.value = minDotRadius;
+maxDotSizeSlider.dataset.value = maxDotRadius;
+radiusChangeSlider.dataset.value = radiusChangeRate;
 
 moveSpeedSlider.dataset.value = dotSpeed;
 slowSpeedSlider.dataset.value = slownessFactor;
@@ -136,6 +142,9 @@ minDotSizeSlider.addEventListener("input", (e) => {
 });
 maxDotSizeSlider.addEventListener("input", (e) => {
   maxDotRadius = parseFloat(maxDotSizeSlider.dataset.value);
+});
+radiusChangeSlider.addEventListener("input", (e) => {
+  radiusChangeRate = parseFloat(radiusChangeSlider.dataset.value);
 });
 separationSlider.addEventListener("input", (e) => {
   separationFactor = parseFloat(separationSlider.dataset.value);
@@ -236,7 +245,7 @@ function createReader(file, whenReady) {
       dotsAreaCanvas.style.aspectRatio = `${canvas.width} / ${canvas.height}`;
       dotsAreaCanvas.classList.add("dots-area-uploaded");
       input_img_label.classList.add("image-uploaded");
-      saveImageButton.classList.remove("hidden");
+      saveButtonDetailsArea.classList.remove("hidden");
 
       canvasContext.drawImage(image, 0, 0);
 
@@ -341,7 +350,10 @@ function DrawDotsOnCanvas(backgroundColor = null) {
     );
   }
 
-  Object.entries(dotDictionary).forEach(([key, dot], i) => {
+  const dotsSortedByRadius = Object.values(dotDictionary).sort(
+    (a, b) => a.radius - b.radius
+  );
+  dotsSortedByRadius.forEach((dot) => {
     DrawDot(dot);
   });
   DrawDebugGrid();
@@ -656,11 +668,7 @@ function UpdateDotRadius(dot) {
   // 0 - darkestPixelValue
   // 1 - brightestPixelValue
   const valueRange = brightestPixelValue - darkestPixelValue;
-  const relativeValue = help.Lerp(
-    0,
-    1,
-    (pixelValue - darkestPixelValue) / valueRange
-  );
+  const relativeValue = (pixelValue - darkestPixelValue) / valueRange;
 
   const desiredRadius = help.Lerp(
     minDotRadius,
