@@ -31,6 +31,7 @@ const minDotSizeSlider = document.getElementById("min-dot-size-slider");
 const maxDotSizeSlider = document.getElementById("max-dot-size-slider");
 const radiusChangeSlider = document.getElementById("radius-change-slider");
 
+const steeringSlider = document.getElementById("steering-slider");
 const separationSlider = document.getElementById("separation-slider");
 const alignmentSlider = document.getElementById("alignment-slider");
 const centeringSlider = document.getElementById("centering-slider");
@@ -53,7 +54,6 @@ const colorChangeRate = 0.2;
 let dotDictionary = {};
 const {
   collisionRadiusMultiplier,
-  steeringStrength,
   decelleration,
   minSpeedPercentage,
   darknessRespawnThreshold,
@@ -74,6 +74,7 @@ let {
   minDotRadius,
   maxDotRadius,
   radiusChangeRate,
+  steeringStrength,
   centeringFactor,
   alignmentFactor,
   separationFactor,
@@ -82,6 +83,7 @@ let {
 
 debugCheckbox.checked = isDrawingDebug;
 
+steeringSlider.dataset.value = steeringStrength;
 separationSlider.dataset.value = separationFactor;
 alignmentSlider.dataset.value = alignmentFactor;
 centeringSlider.dataset.value = centeringFactor;
@@ -145,6 +147,9 @@ maxDotSizeSlider.addEventListener("input", (e) => {
 });
 radiusChangeSlider.addEventListener("input", (e) => {
   radiusChangeRate = parseFloat(radiusChangeSlider.dataset.value);
+});
+steeringSlider.addEventListener("input", (e) => {
+  steeringStrength = parseFloat(steeringSlider.dataset.value);
 });
 separationSlider.addEventListener("input", (e) => {
   separationFactor = parseFloat(separationSlider.dataset.value);

@@ -235,6 +235,28 @@
           <div
             class="slider"
             data-value-type="float"
+            data-min="0.001"
+            data-max=".1"
+            data-value=".05"
+            data-info="The general strength of steering changes.
+            <br />
+            <br />
+            <em>lower = smoother steering / less drastic direction changes</em>"
+            id="steering-slider"
+          >
+            <p class="slider--header">Steering Strength</p>
+            <div class="slider--background">
+              <div class="slider--fill"></div>
+              <div class="slider--handle"></div>
+            </div>
+            <ion-icon
+              name="information-circle-outline"
+              class="info-button"
+            ></ion-icon>
+          </div>
+          <div
+            class="slider"
+            data-value-type="float"
             data-min="0"
             data-max="2"
             data-value=".1"
