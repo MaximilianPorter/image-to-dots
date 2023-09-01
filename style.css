@@ -52,6 +52,40 @@ body {
   overflow: hidden;
 }
 
+.socials {
+  position: absolute;
+  top: 0;
+  right: 50%;
+  transform: translateX(50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 1rem;
+}
+.social-button {
+  cursor: pointer;
+  height: 2.4rem;
+  width: 2.4rem;
+  color: var(--text_light);
+  transition: all 0.2s ease-in-out;
+  opacity: 0.2;
+  color: black;
+}
+.social-button .social-icon {
+  height: 100%;
+  width: 100%;
+}
+.social-button p {
+  display: none;
+}
+.social-button:hover {
+  transform: scale(1.1);
+  opacity: 1;
+  color: var(--color1);
+}
+
 #background {
   /* height: 100vh;
   background: repeat radial-gradient(#00193b99 9%, transparent 9%);
