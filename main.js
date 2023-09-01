@@ -521,7 +521,12 @@ function DrawDebug(dot) {
     );
 
     // draw grid cells around dot
-    const neighboringCells = getNeighboringCells(gridPosition);
+    const neighboringCells = getNeighboringCells(
+      grid,
+      gridPosition,
+      cellSize,
+      dotsAreaCanvas
+    );
 
     neighboringCells.forEach((cell) => {
       const [x, y] = cell.split(",").map((num) => num * cellSize);
