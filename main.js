@@ -82,19 +82,30 @@ let {
 debugCheckbox.checked = isDrawingDebug;
 
 steeringSlider.dataset.value = steeringStrength;
+steeringSlider.dataset.startValue = steeringStrength;
 separationSlider.dataset.value = separationFactor;
+separationSlider.dataset.startValue = separationFactor;
 alignmentSlider.dataset.value = alignmentFactor;
+alignmentSlider.dataset.startValue = alignmentFactor;
 centeringSlider.dataset.value = centeringFactor;
+centeringSlider.dataset.startValue = centeringFactor;
 
 minDotSizeSlider.dataset.value = minDotRadius;
+minDotSizeSlider.dataset.startValue = minDotRadius;
 maxDotSizeSlider.dataset.value = maxDotRadius;
+maxDotSizeSlider.dataset.startValue = maxDotRadius;
 radiusChangeSlider.dataset.value = radiusChangeRate;
+radiusChangeSlider.dataset.startValue = radiusChangeRate;
 
 moveSpeedSlider.dataset.value = dotSpeed;
+moveSpeedSlider.dataset.startValue = dotSpeed;
 slowSpeedSlider.dataset.value = slownessFactor;
+slowSpeedSlider.dataset.startValue = slownessFactor;
 
 gridSizeSlider.dataset.value = CELL_SIZE;
+gridSizeSlider.dataset.startValue = CELL_SIZE;
 dotCountSlider.dataset.value = dotsToAdd;
+dotCountSlider.dataset.startValue = dotsToAdd;
 
 input_img_element.addEventListener("change", (e) => {
   if (e.target.files.length === 0) return;

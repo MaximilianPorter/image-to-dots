@@ -212,11 +212,25 @@ body {
   gap: 1rem;
   margin-bottom: 1rem;
 
+  max-height: 100%;
+
   transition: all 0.3s ease-in-out;
 }
 
 .settings-collapsed {
   transform: translateX(-100%);
+}
+
+.list-settings-sections {
+  overflow-y: scroll;
+}
+/* hide scrollbars */
+.list-settings-sections::-webkit-scrollbar {
+  display: none;
+}
+.list-settings-sections {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .settings-header {
@@ -358,6 +372,19 @@ body {
   color: var(--text--dark);
   border-radius: 5px;
   padding: 1rem;
+}
+
+.reset-setting-button {
+  position: absolute;
+  top: 50%;
+  left: -0.2rem;
+  transform: translate(-100%, -50%);
+  height: 1.6rem;
+  width: 1.6rem;
+  cursor: pointer;
+}
+.reset-setting-button:hover {
+  color: var(--color1);
 }
 
 #dot-size-bezier {

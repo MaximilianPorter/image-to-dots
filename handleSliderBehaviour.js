@@ -5,9 +5,12 @@ const sliderHandleValue = document.getElementById("slider--handle-value");
 let currentDraggingSlider = null;
 
 sliders.forEach((slider) => {
+  slider.dataset.startValue = slider.dataset.value;
   slider.dataset.lastValue = slider.dataset.value;
   const background = slider.querySelector(".slider--background");
   const handle = slider.querySelector(".slider--handle");
+
+  // background event listeners
   background.addEventListener(
     "mousedown",
     (e) => (currentDraggingSlider = slider)
@@ -16,6 +19,15 @@ sliders.forEach((slider) => {
     AdjustSliderValue(slider, e);
   });
 
+  // reset event listeners
+  const resetButton = slider.querySelector(".reset-setting-button");
+  resetButton.classList.add("hidden");
+  resetButton.addEventListener("click", (e) => {
+    slider.dataset.value = slider.dataset.startValue;
+    resetButton.classList.add("hidden");
+  });
+
+  // handle event listeners
   handle.addEventListener("mouseover", (e) => {
     if (currentDraggingSlider) return;
     ShowSliderValue(true, slider);
@@ -46,6 +58,7 @@ function CheckForSliderUpdate() {
     ) {
       UpdateVisualsToMatchValue(slider);
       slider.dataset.lastValue = slider.dataset.value;
+      slider.dispatchEvent(new Event("input", { bubbles: true }));
     }
   });
   requestAnimationFrame(CheckForSliderUpdate);
@@ -71,6 +84,11 @@ function AdjustSliderValue(slider, e) {
   fill.style.width = `${
     (help.Lerp(minRect, maxRect, percentage) / rect.width) * 100
   }%`;
+
+  const resetButton = slider.querySelector(".reset-setting-button");
+  if (slider.dataset.value !== slider.dataset.startValue) {
+    resetButton.classList.remove("hidden");
+  }
 
   ShowSliderValue(true, slider);
 
