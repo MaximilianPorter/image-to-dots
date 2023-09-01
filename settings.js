@@ -6,12 +6,9 @@ class Settings {
     dotSpeed = 0.2,
     maxDotRadius = 10,
     minDotRadius = 3,
-    bounceDamper = 0.7,
     decelleration = 0.008,
     radiusChangeRate = 0.1,
     collisionRadiusMultiplier = 1.1,
-    darknessRespawnThreshold = 0.05,
-    bounceOffForce = 0.4,
     steeringStrength = 0.05,
     minSpeedPercentage = 0.15,
     debugDetectionRadius = maxDotRadius + 50,
@@ -31,12 +28,9 @@ class Settings {
     this.dotSpeed = dotSpeed;
     this.maxDotRadius = maxDotRadius;
     this.minDotRadius = minDotRadius;
-    this.bounceDamper = bounceDamper;
     this.decelleration = decelleration;
     this.radiusChangeRate = radiusChangeRate;
     this.collisionRadiusMultiplier = collisionRadiusMultiplier;
-    this.darknessRespawnThreshold = darknessRespawnThreshold;
-    this.bounceOffForce = bounceOffForce;
     this.steeringStrength = steeringStrength;
     this.minSpeedPercentage = minSpeedPercentage;
     this.debugDetectionRadius = debugDetectionRadius;

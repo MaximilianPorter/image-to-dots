@@ -1,7 +1,7 @@
 // import Dot.js
 import Dot from "./Dot.js";
 import * as help from "./helper.js";
-import { createGrid } from "./grid.js";
+import { createGrid, getNeighboringCells } from "./grid.js";
 import {
   getApproximatePixelColor,
   getPixelValue,
@@ -49,14 +49,12 @@ let uploadedImageData;
 let grid = {};
 let darkestPixelValue = 1;
 let brightestPixelValue = 0;
-const colorChangeRate = 0.2;
 
 let dotDictionary = {};
 const {
   collisionRadiusMultiplier,
   decelleration,
   minSpeedPercentage,
-  darknessRespawnThreshold,
   debugDetectionRadius,
   turnTowardsLightFactor,
   steerFromMouseFactor,
@@ -550,7 +548,7 @@ function DrawDebug(dot) {
     });
 
     // draw dots in neighboring cells
-    const dotsInNeighboringCells = getDotsInNeighboringCells(dot);
+    const dotsInNeighboringCells = GetDotsInNeighboringCells(dot);
     dotsInNeighboringCells.forEach((otherDot) => {
       const { position: otherPosition } = otherDot;
       help.drawCircle(
@@ -609,9 +607,14 @@ function UpdateGridPosition(dot) {
   }
 }
 
-function getDotsInNeighboringCells(dot) {
+function GetDotsInNeighboringCells(dot) {
   const { gridPosition } = dot;
-  const neighboringCells = getNeighboringCells(gridPosition);
+  const neighboringCells = getNeighboringCells(
+    grid,
+    gridPosition,
+    CELL_SIZE,
+    dotsAreaCanvas
+  );
 
   const dotsInNeighboringCells = [];
 
@@ -628,48 +631,6 @@ function getDotsInNeighboringCells(dot) {
   }
 
   return dotsInNeighboringCells;
-}
-
-function getNeighboringCells(gridPosition) {
-  const neighboringCells = [
-    `${gridPosition.x},${gridPosition.y}`,
-    `${gridPosition.x},${gridPosition.y - 1}`, // this can be undefined
-    `${gridPosition.x},${gridPosition.y + 1}`, // this can be undefined
-    `${gridPosition.x - 1},${gridPosition.y}`, // this can be undefined
-    `${gridPosition.x - 1},${gridPosition.y - 1}`,
-    `${gridPosition.x - 1},${gridPosition.y + 1}`,
-    `${gridPosition.x + 1},${gridPosition.y}`, // this can be undefined
-    `${gridPosition.x + 1},${gridPosition.y - 1}`,
-    `${gridPosition.x + 1},${gridPosition.y + 1}`,
-  ];
-
-  const lastXCell = Math.floor(dotsAreaCanvas.width / CELL_SIZE);
-  const lastYCell = Math.floor(dotsAreaCanvas.height / CELL_SIZE);
-
-  for (let i = 0; i < neighboringCells.length; i++) {
-    // this means the dot is somewhere on the edge of the canvas
-    if (grid[neighboringCells[i]] === undefined) {
-      if (i === 1) {
-        neighboringCells[1] = `${gridPosition.x},${lastYCell}`;
-        neighboringCells[4] = `${gridPosition.x - 1},${lastYCell}`;
-        neighboringCells[7] = `${gridPosition.x + 1},${lastYCell}`;
-      } else if (i === 2) {
-        neighboringCells[2] = `${gridPosition.x},${0}`;
-        neighboringCells[5] = `${gridPosition.x - 1},${0}`;
-        neighboringCells[8] = `${gridPosition.x + 1},${0}`;
-      } else if (i === 3) {
-        neighboringCells[3] = `${lastXCell},${gridPosition.y}`;
-        neighboringCells[4] = `${lastXCell},${gridPosition.y - 1}`;
-        neighboringCells[5] = `${lastXCell},${gridPosition.y + 1}`;
-      } else if (i === 6) {
-        neighboringCells[6] = `${0},${gridPosition.y}`;
-        neighboringCells[7] = `${0},${gridPosition.y - 1}`;
-        neighboringCells[8] = `${0},${gridPosition.y + 1}`;
-      }
-    }
-  }
-
-  return neighboringCells;
 }
 
 function UpdateDotRadius(dot) {
@@ -700,25 +661,11 @@ function UpdateDotRadius(dot) {
 
   dot.detectionRadius = dot.radius + CELL_SIZE * (dot.moveSpeed / dotSpeed);
   dot.collisionRadius = dot.detectionRadius * collisionRadiusMultiplier;
-
-  // const smallestRadiusForRespawn = Lerp(
-  //   darkestPixelValue,
-  //   1,
-  //   darknessRespawnThreshold
-  // );
-
-  // if (dot.radius < Lerp(minDotRadius, maxDotRadius, smallestRadiusForRespawn)) {
-  //   respawnDot(dot);
-  // }
 }
 
 function HandleDotCollision(dot) {
-  const dotsInNeighboringCells = getDotsInNeighboringCells(dot);
-  // const dotsInNeighboringCells = Object.values(dotDictionary);
+  const dotsInNeighboringCells = GetDotsInNeighboringCells(dot);
   const direction = SteerDirection(dot, dotsInNeighboringCells);
-  // dot.moveDirection = dot.moveDirection.map((dir, i) => {
-  //   return help.Clamp(dir + direction[i] * steeringStrength, -1, 1);
-  // });
   dot.moveDirection = help.NormalizeVector([
     dot.moveDirection[0] + direction[0] * steeringStrength,
     dot.moveDirection[1] + direction[1] * steeringStrength,
@@ -748,7 +695,6 @@ function SteerDirection(dot, otherDots) {
     let otherDotPosition = AdjustPositionForOppositeSide(dot, otherDot);
 
     const dotsVector = help.VectorDirection(dot.position, otherDotPosition);
-    // const distance = VectorMagnitude(dotsVector);
     const distance2 = help.SquareVectorMagnitude(dotsVector);
     const dotProduct = help.DotProduct(moveDirection, dotsVector);
 
@@ -872,54 +818,6 @@ function AdjustPositionForOppositeSide(dot, otherDot) {
   return otherDotPosition;
 }
 
-function TurnAwayFromEdges(dot, direction) {
-  const topEdgeVector = [dot.position[0], 0];
-  const bottomEdgeVector = [dot.position[0], dotsAreaCanvas.height];
-  const leftEdgeVector = [0, dot.position[1]];
-  const rightEdgeVector = [dotsAreaCanvas.width, dot.position[1]];
-
-  const closestEdgeVector = [
-    topEdgeVector,
-    bottomEdgeVector,
-    leftEdgeVector,
-    rightEdgeVector,
-  ].reduce((prev, curr) => {
-    const prevDistance2 = help.SquareVectorMagnitude(
-      help.VectorDirection(dot.position, prev)
-    );
-    const currDistance2 = help.SquareVectorMagnitude(
-      help.VectorDirection(dot.position, curr)
-    );
-    return prevDistance2 < currDistance2 ? prev : curr;
-  });
-
-  // check if dot is close to edge
-  const edgeDistance = help.SquareVectorMagnitude(
-    help.VectorDirection(dot.position, closestEdgeVector)
-  );
-  if (edgeDistance < dot.detectionRadius * dot.detectionRadius) {
-    const edgeVector = help.VectorDirection(dot.position, closestEdgeVector);
-    direction = direction.map(
-      (dir, i) =>
-        dir +
-        edgeVector[i] * 0.8 * (1 - edgeDistance / (dot.radius * dot.radius))
-    );
-    if (dot.id === 0 && isDrawingDebug) {
-      help.drawLine(
-        dotsAreaCanvasContext,
-        dot.position[0],
-        dot.position[1],
-        closestEdgeVector[0],
-        closestEdgeVector[1],
-        "green",
-        2
-      );
-    }
-  }
-
-  return direction;
-}
-
 function DebugDrawLinePositions(pos1, pos2) {
   if (!isDrawingDebug) return;
   help.drawLine(
@@ -931,51 +829,4 @@ function DebugDrawLinePositions(pos1, pos2) {
     "blue",
     2
   );
-}
-
-function randomPointOnOppoSideOfImage(xPercent, yPercent) {
-  let x2,
-    y2 = 0;
-  if (xPercent < 0.5) {
-    x2 = Math.random(0.5, 1) * dotsAreaCanvas.width;
-  } else {
-    x2 = Math.random(0, 0.5) * dotsAreaCanvas.width;
-  }
-
-  if (yPercent < 0.5) {
-    y2 = Math.random(0.5, 1) * dotsAreaCanvas.height;
-  } else {
-    y2 = Math.random(0, 0.5) * dotsAreaCanvas.height;
-  }
-
-  return { x: x2, y: y2 };
-}
-
-function respawnDot(dot) {
-  for (let i = 0; i < 100; i++) {
-    const randomPos = {
-      x: help.Lerp(0.1, 0.9, Math.random()) * dotsAreaCanvas.width,
-      y: help.Lerp(0.1, 0.9, Math.random()) * dotsAreaCanvas.height,
-    };
-    const randomPosPercent = {
-      x: randomPos.x / dotsAreaCanvas.width,
-      y: randomPos.y / dotsAreaCanvas.height,
-    };
-
-    const pixelValue = getPixelValue(
-      randomPosPercent.x,
-      randomPosPercent.y,
-      uploadedImageData
-    );
-
-    if (pixelValue > (darkestPixelValue + 1) * 0.6) {
-      dot.position = randomPos;
-      dot.radius = minDotRadius;
-      dot.desiredPosition = randomPointOnOppoSideOfImage(
-        randomPosPercent.x,
-        randomPosPercent.y
-      );
-      break;
-    }
-  }
 }
