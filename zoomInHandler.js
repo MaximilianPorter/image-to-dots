@@ -1,4 +1,5 @@
 // this helped: https://stackoverflow.com/questions/2916081/zoom-in-on-a-point-using-scale-and-translate
+import * as help from "./helper.js";
 
 const input_img_element = document.getElementById("input-image");
 const dotsAreaSection = document.querySelector(".dots-area-section");
@@ -18,14 +19,20 @@ let middleMouseDelta = 0;
 let holdingMiddleMouse = false;
 let middleMouseStart = { x: 0, y: 0 };
 
+let draggingCanvas = false;
+
 // detect mouse wheel click in
 document.addEventListener("mousedown", (event) => {
+  if (event.button === 0 && scale > 1) {
+    draggingCanvas = true;
+  }
   if (event.button === 1) {
     holdingMiddleMouse = true;
     middleMouseStart = { x: event.clientX, y: event.clientY };
   }
 });
 document.addEventListener("mouseup", (event) => {
+  if (event.button === 0) draggingCanvas = false;
   if (event.button === 1) holdingMiddleMouse = false;
 });
 
@@ -39,6 +46,11 @@ function ListenForMiddleMouse() {
 ListenForMiddleMouse();
 
 document.addEventListener("mousemove", (event) => {
+  if (draggingCanvas) {
+    dragCanvasWithMouse(event);
+    // return;
+  }
+
   if (holdingMiddleMouse) middleMouseDelta = middleMouseStart.y - event.clientY;
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
@@ -51,11 +63,8 @@ document.addEventListener("mousemove", (event) => {
     x: percent.x * visibleWidth + originx,
     y: percent.y * visibleHeight + originy,
   };
-  // draw red circle where mouse is on canvas
-  // context.beginPath();
-  // context.arc(mousePosOnCanvas.x, mousePosOnCanvas.y, 5, 0, 2 * Math.PI);
-  // context.fillStyle = "red";
-  // context.fill();
+
+  // DrawMousePosition();
 });
 
 canvas.addEventListener("wheel", (event) => {
@@ -73,7 +82,13 @@ input_img_element.addEventListener("change", (e) => {
       console.log("loaded");
       // wait for canvas to update
       setTimeout(() => {
-        zoomInOnMouse({ deltaY: 100 }); // zoom out a little bit to set scale
+        // set the origin
+        originx = 0;
+        originy = 0;
+
+        // set the visible width and height
+        visibleWidth = canvas.width / scale;
+        visibleHeight = canvas.height / scale;
       }, 100);
     };
     img.src = event.target.result;
@@ -151,5 +166,47 @@ function zoomInOnMiddle(event, increment = 1) {
   // prevent canvas from zooming out too far
   preventZoomOut(width, height);
 }
+
+function dragCanvasWithMouse(event) {
+  if (draggingCanvas) {
+    // clamp dragging to canvas
+
+    const mousex = event.movementX;
+    const mousey = event.movementY;
+
+    const maxWidth = canvas.width - visibleWidth;
+    const maxHeight = canvas.height - visibleHeight;
+
+    const lastOriginX = originx;
+    const lastOriginY = originy;
+    originx = help.Clamp(originx - mousex, 0, maxWidth);
+    originy = help.Clamp(originy - mousey, 0, maxHeight);
+
+    const changeX = originx - lastOriginX;
+    const changeY = originy - lastOriginY;
+
+    context.translate(-changeX, -changeY);
+  }
+}
+
+function DrawMousePosition() {
+  // draw red circle where mouse is on canvas
+  context.beginPath();
+  context.arc(mousePosOnCanvas.x, mousePosOnCanvas.y, 5, 0, 2 * Math.PI);
+  context.fillStyle = "red";
+  context.fill();
+}
+
+function drawOrigin() {
+  // big green circle at origin
+  context.beginPath();
+  context.arc(originx, originy, 100, 0, 2 * Math.PI);
+  context.fillStyle = "green";
+  context.fill();
+  // console.log(originx, originy);
+
+  requestAnimationFrame(drawOrigin);
+}
+// drawOrigin();
 
 export { mousePosOnCanvas, scale };

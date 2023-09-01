@@ -794,7 +794,7 @@ function SteerDirection(dot, otherDots) {
   }
 
   // steer away from mouse
-  if (canvasMousePosition !== null) {
+  if (canvasMousePosition !== null && scale <= 1) {
     const maxMouseDist = 200 / scale;
     const minMouseDist = 150 / scale;
     const mouseVector = help.VectorDirection(dot.position, canvasMousePosition);
