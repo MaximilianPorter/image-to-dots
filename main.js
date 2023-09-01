@@ -15,6 +15,7 @@ import "./settingsSection.js";
 import "./handleSliderBehaviour.js";
 import { mousePosOnCanvas, scale } from "./zoomInHandler.js";
 
+const actionButtonsSection = document.querySelector(".action-buttons");
 const input_img_element = document.getElementById("input-image");
 const input_img_label = document.getElementById("input-image-label");
 const saveImageButton = document.querySelector(".save-image-button");
@@ -270,7 +271,7 @@ function createReader(file, whenReady) {
       dotsAreaCanvas.height = (setCanvasWidth / canvas.width) * canvas.height;
       dotsAreaCanvas.style.aspectRatio = `${canvas.width} / ${canvas.height}`;
       dotsAreaCanvas.classList.add("dots-area-uploaded");
-      input_img_label.classList.add("image-uploaded");
+      actionButtonsSection.classList.add("image-uploaded");
       saveButtonDetailsArea.classList.remove("hidden");
 
       canvasContext.drawImage(image, 0, 0);

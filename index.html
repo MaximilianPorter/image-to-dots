@@ -29,29 +29,35 @@
     </div>
     <div id="background">
       <div class="action-buttons">
-        <label id="input-image-label" for="input-image" class
-          >Upload Image</label
-        >
-        <input
-          id="input-image"
-          type="file"
-          src="#"
-          alt="missing image"
-          accept="image/*"
-        />
-        <div class="save-button-details hidden">
-          <button type="button" class="save-image-button">Save Image</button>
-          <label
-            for="alpha-background-checkbox"
-            id="alpha-background-checkbox-label"
-          >
-            <input
-              type="checkbox"
-              name="alpha-background-save"
-              id="alpha-background-checkbox"
-            />
-            Transparent Background
-          </label>
+        <div class="action-button-section">
+          <label id="input-image-label" for="input-image">Upload Image</label>
+          <input
+            id="input-image"
+            type="file"
+            src="#"
+            alt="missing image"
+            accept="image/*"
+          />
+        </div>
+        <div class="action-button-section">
+          <div class="save-button-details hidden">
+            <button type="button" class="save-image-button">Save Image</button>
+            <label
+              for="alpha-background-checkbox"
+              id="alpha-background-checkbox-label"
+            >
+              <input
+                type="checkbox"
+                name="alpha-background-save"
+                id="alpha-background-checkbox"
+              />
+              Transparent Background
+            </label>
+          </div>
+        </div>
+        <div class="action-button-section fullscreen-prompt">
+          <p>F</p>
+          <p>- FULLSCREEN</p>
         </div>
       </div>
       <section class="settings settings-collapsed">
@@ -417,7 +423,7 @@
       <div class="preview-images">
         <canvas id="input-image-preview" class=""></canvas>
         <div class="dots-area-section">
-          <canvas id="dots-area" class=""></canvas>
+          <canvas id="dots-area" class=""> </canvas>
         </div>
       </div>
     </div>
