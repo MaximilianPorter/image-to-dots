@@ -39,6 +39,7 @@ const centeringSlider = document.getElementById("centering-slider");
 
 const moveSpeedSlider = document.getElementById("move-speed-slider");
 const slowSpeedSlider = document.getElementById("slow-speed-slider");
+const windSlider = document.getElementById("wind-slider");
 
 // settings elements
 const isColored_element = document.getElementById("IsColoredCheck");
@@ -78,6 +79,7 @@ let {
   alignmentFactor,
   separationFactor,
   slownessFactor,
+  windFactor,
 } = valueSettings.currentSettings;
 
 debugCheckbox.checked = isDrawingDebug;
@@ -102,6 +104,7 @@ moveSpeedSlider.dataset.value = dotSpeed;
 moveSpeedSlider.dataset.startValue = dotSpeed;
 slowSpeedSlider.dataset.value = slownessFactor;
 slowSpeedSlider.dataset.startValue = slownessFactor;
+windSlider.dataset.value = windFactor;
 
 gridSizeSlider.dataset.value = CELL_SIZE;
 gridSizeSlider.dataset.startValue = CELL_SIZE;
@@ -180,6 +183,9 @@ moveSpeedSlider.addEventListener("input", (e) => {
 slowSpeedSlider.addEventListener("input", (e) => {
   slownessFactor = slowSpeedSlider.dataset.value;
 });
+windSlider.addEventListener("input", (e) => {
+  windFactor = windSlider.dataset.value;
+});
 gridSizeSlider.addEventListener("change", (e) => {
   CELL_SIZE = parseInt(e.target.dataset.value);
   ResetGrid();
@@ -243,6 +249,14 @@ dotsAreaCanvas.addEventListener("mousemove", (e) => {
 document.addEventListener("mouseup", (e) => {
   draggingMouse = false;
   canvasMousePosition = null;
+});
+
+// on spacebar
+document.addEventListener("keydown", (e) => {
+  if (e.keyCode === 32) {
+    // spacebar
+    colored = !colored;
+  }
 });
 
 let lastTimeUpdate = performance.now();
@@ -785,6 +799,9 @@ function SteerDirection(dot, otherDots) {
       (dir, i) => dir + dotsVector[i] * turnTowardsLightFactor
     );
   }
+
+  // apply wind force (-1 left to 1 right)
+  direction = direction.map((dir, i) => dir + windFactor * (i === 0 ? 1 : 0));
 
   if (dotsVisible > 0) {
     xposAvg /= dotsVisible;

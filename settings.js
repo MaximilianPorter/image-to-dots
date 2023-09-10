@@ -19,6 +19,7 @@ class Settings {
     turnTowardsLightFactor = 0.01,
     steerFromMouseFactor = 3,
     slownessFactor = 0.75,
+    windFactor = 0,
     visionDotProductThreshold = -0.5,
     slowDotProductThreshold = 0.5
   ) {
@@ -41,6 +42,7 @@ class Settings {
     this.turnTowardsLightFactor = turnTowardsLightFactor;
     this.steerFromMouseFactor = steerFromMouseFactor;
     this.slownessFactor = slownessFactor;
+    this.windFactor = windFactor;
     this.visionDotProductThreshold = visionDotProductThreshold;
     this.slowDotProductThreshold = slowDotProductThreshold;
   }
