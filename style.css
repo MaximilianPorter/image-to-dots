@@ -130,7 +130,7 @@ body {
   padding: 1rem;
   z-index: -1;
 }
-.fullscreen-prompt {
+.button-prompt {
   text-align: center;
   color: var(--text_light);
   font-weight: 500;
@@ -140,14 +140,14 @@ body {
   justify-content: center;
   gap: 1rem;
 }
-.fullscreen-prompt p:first-child {
+.button-prompt p:first-child {
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--text_light);
-  height: 2.4rem;
-  width: 2.4rem;
   border-radius: 5px;
+
+  padding: 0.2rem 0.8rem;
 }
 .save-button-details {
   display: flex;
